@@ -42,6 +42,42 @@ Tények, amiket a kód nem mond el magától. Frissítsd, ha újat tanulsz!
 - Kiadás kb. napi 4× (ECMWF-futásokhoz kötve); a kiadási idő (`Kiadva:`) a
   forecast_runs kulcs része.
 
+## Grafana dashboardok (uid: `dombori-vizallas`, `dombori-szezonalis`)
+
+- **Epoch-csapda**: a `$__timeGroup` makró numerikus epochot ad vissza, és a
+  Grafana a ±10⁹ alatti értékeket (kb. 1938–2001) milliszekundumnak nézi →
+  az idősor 1970-re esik össze. Megoldás: kézi bucketolás
+  `to_timestamp(floor(extract(epoch FROM ...) / N) * N)`-nel (valódi
+  timestamptz-t adunk vissza). A történelmi sáv-panelek így működnek.
+- **Adaptív felbontás**: a bucket-méret `GREATEST($__interval_ms/1000, 86400)`
+  — széles nézetben havi, bezoomolva napi.
+- **Trend panel korlátai**: csak EGY frame-et fogad (partition után joinByField
+  kell), és a tengelyére csak számot tud írni, dátumot/hónapnevet nem.
+  Szezonális (évek egymáson) nézethez ezért külön dashboard van:
+  minden év az AKTUÁLIS évre vetítve (`make_date(extract(year FROM now())...)`),
+  fix `now/y → now/y` időablakkal → valódi hónapnevek a tengelyen.
+- **Évfüggetlenség**: az idei/tavalyi kiemelés a metric NEVÉBEN van
+  (`'idei (2026)'`, `'tavalyi (2025)'` — CASE a SQL-ben), a stílus
+  `^idei.*`/`^tavalyi.*` regex-override; a panelcím évszámai rejtett
+  template-változók (`elso_ev`, `elso_ev_bartal`, `aktualis_ev`). Semmi
+  beégetett évszám!
+- **Gradiens színezés**: évenkénti byRegexp override-ok (`^1901$`…),
+  sötétszürke→kék; 2027–2035 előre beszínezve. A legendából a történelmi évek
+  `defaults.custom.hideFrom.legend=true`-val vannak kirejtve, a kiemelt sorok
+  override-ban kapják vissza.
+- **Küszöbvonalak**: `thresholdsStyle: line` + színes step-ek — Duna: 400 cm
+  szivornya-minimum (zöld), LKV −87 / LNV 916 (piros); Bartal: KF 170/190/200.
+- **Archív folytonosság**: a 15 perces panelek 28 napnál régebbre a napi
+  átlaggal folytatódnak UNION ALL-lal, azonos series-névvel (délre igazítva).
+- A user maga is szerkeszti a dashboardokat a UI-ban — MCP-ből CSAK célzott
+  patch-műveletet (`operations`) használj, teljes felülírást soha, és a
+  színeit/elrendezését ne írd felül!
+- **Esemény-annotációk**: `holtag_events` tábla (seed `sql/002_events.sql`,
+  csak vízállás-releváns események, `impact` pozitiv/negativ) → a fő
+  dashboardon két annotáció-réteg (zöld/piros), SQL-lel:
+  `start_date::timestamptz AS time, end_date::timestamptz AS timeend` —
+  itt is timestamptz kell, numerikus epoch NEM (ld. epoch-csapda fent).
+
 ## Üzemeltetés
 
 - DB: Docker `dombori_db` (postgres:17-alpine), named volume `dombori_pgdata`,

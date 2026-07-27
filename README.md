@@ -62,6 +62,16 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m dombori backfill [--station TSZ] [--chunk-years N]
 ```
 
+## Történeti esemény-annotációk
+
+A `holtag_events` tábla (seed: `sql/002_events.sql`) a holtág vízállás
+szempontjából releváns történeti eseményeit tartalmazza (1838-tól), `impact`
+minősítéssel. A fő Grafana dashboardon annotációként jelennek meg: **zöld** =
+pozitív (vízpótlás, kotrás, duzzasztás), **piros** = negatív (lefűződés,
+árvíz, vízminőségi kár). A két réteg a dashboard tetején ki-be kapcsolható.
+Új esemény felvétele: sor a seed SQL-be, majd újrafuttatás
+(`docker exec -i dombori_db psql -U dombori -d dombori < sql/002_events.sql`).
+
 ## Tesztek
 
 ```bash
