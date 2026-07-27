@@ -1,0 +1,9 @@
+[Unit]
+Description=Run dombori collect every 15 minutes
+
+[Timer]
+OnCalendar=*:01/15
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

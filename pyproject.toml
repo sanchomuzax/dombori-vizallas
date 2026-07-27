@@ -1,0 +1,23 @@
+[project]
+name = "dombori-vizallas"
+version = "0.1.0"
+description = "Danube water-level collection around Dombori (stations 550, 142062) with Hydroinfo forecast snapshots"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "psycopg[binary]>=3.1",
+    "beautifulsoup4>=4.12",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests requiring the live docker database (skipped when unreachable)",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

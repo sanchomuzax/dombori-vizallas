@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: dombori_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DOMBORI_DB_USER}
+      POSTGRES_PASSWORD: ${DOMBORI_DB_PASSWORD}
+      POSTGRES_DB: ${DOMBORI_DB_NAME}
+    ports:
+      - "127.0.0.1:${DOMBORI_DB_PORT}:5432"
+    volumes:
+      - dombori_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DOMBORI_DB_USER} -d ${DOMBORI_DB_NAME}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dombori_pgdata:

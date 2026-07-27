@@ -1,0 +1,15 @@
+# Secrets — never commit
+.env*
+!.env.local.example
+
+# Local data (raw snapshots, exports)
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs
+*.log

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run dombori hydroinfo hourly
+
+[Timer]
+OnCalendar=*:07:00
+RandomizedDelaySec=60
+Persistent=true
+
+[Install]
+WantedBy=timers.target

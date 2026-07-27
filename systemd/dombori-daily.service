@@ -1,0 +1,9 @@
+[Unit]
+Description=Dombori water level: daily aggregation and retention
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documents/dombori-vizallas
+ExecStart=%h/Documents/dombori-vizallas/.venv/bin/python -m dombori daily
