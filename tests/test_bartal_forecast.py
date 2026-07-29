@@ -108,3 +108,26 @@ def test_expand_to_6h_grid():
     # 6 órás lépésköz
     deltas = {(grid[i + 1].target_ts - grid[i].target_ts).total_seconds() for i in range(23)}
     assert deltas == {21600.0}
+
+
+def test_trend_blending_pulls_forecast_down():
+    from dombori.bartal_forecast import recent_trend_per_day
+
+    series = _flat_series(date(2010, 1, 1), 5990) + tuple(
+        (date(2010, 1, 1) + timedelta(days=5990 + i), 100.0 - 0.5 * (i + 1))
+        for i in range(10)
+    )
+    last_day, last_value = series[-1]
+    trend = recent_trend_per_day(series, last_day, last_value)
+    assert trend == pytest.approx(-0.5, abs=0.01)
+    points = compute_forecast(series, last_day, last_value, trend_per_day=trend)
+    # 50% momentum: 6. napra kb. -1.5 cm (0.5 * -0.5 * 6), a szezonális ~0
+    drift = points[-1].value_cm - last_value
+    assert -2.5 < drift < -0.5
+
+
+def test_zero_trend_keeps_persistence():
+    series = _flat_series(date(2010, 1, 1), 5000)
+    last_day, last_value = series[-1]
+    from dombori.bartal_forecast import recent_trend_per_day
+    assert recent_trend_per_day(series, last_day, last_value) == 0.0

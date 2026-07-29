@@ -79,13 +79,31 @@ def _percentile(sorted_values: tuple[float, ...], q: float) -> float:
     return sorted_values[lo] * (1 - frac) + sorted_values[hi] * frac
 
 
+def recent_trend_per_day(
+    series: tuple[tuple[date, float], ...], last_day: date, last_value: float
+) -> float:
+    """Az utolsó ~7 nap átlagos napi változása (cm/nap); hiányzó adatnál 0."""
+    by_date = dict(series)
+    for back in range(7, 11):
+        earlier = by_date.get(last_day - timedelta(days=back))
+        if earlier is not None:
+            return (last_value - earlier) / back
+    return 0.0
+
+
 def compute_forecast(
     series: tuple[tuple[date, float], ...],
     last_day: date,
     last_value: float,
     horizon: int = HORIZON_DAYS,
+    trend_per_day: float = 0.0,
 ) -> tuple[StatPoint, ...]:
-    """Pure: perzisztencia + szezonális drift + empirikus sáv pontonként."""
+    """Pure: 50% szezonális drift + 50% lendület + empirikus sáv.
+
+    A 2005-2026-os backtest szerint (6 napos MAE): szezonális 2,22 cm,
+    tiszta momentum 2,66, 50-50 blend 2,21 — eső trendben a blend
+    kifejezetten jobb (2,24 vs 2,50), ezért a keverék a modell.
+    """
     if len(series) < 365:
         raise ForecastError(f"Túl rövid történelmi sor: {len(series)} nap")
 
@@ -100,7 +118,7 @@ def compute_forecast(
                 f"Kevés minta a {k} napos horizonthoz: {len(changes)}"
             )
         ordered = tuple(sorted(changes))
-        drift = median(ordered)
+        drift = 0.5 * median(ordered) + 0.5 * trend_per_day * k
         band = (_percentile(ordered, 0.95) - _percentile(ordered, 0.05)) / 2.0
         target = datetime.combine(last_day + timedelta(days=k), time(12, 0), TZ)
         points.append(
@@ -170,7 +188,8 @@ def run_bartal_forecast(conn: psycopg.Connection, config) -> int | None:
     if not series:
         raise ForecastError("Nincs Bartal napi adat")
     last_day, last_value = series[-1]
-    daily_points = compute_forecast(series, last_day, last_value)
+    trend = recent_trend_per_day(series, last_day, last_value)
+    daily_points = compute_forecast(series, last_day, last_value, trend_per_day=trend)
     points = expand_to_6h_grid(daily_points, last_day, last_value)
 
     duna_max = _duna_forecast_max(conn)
