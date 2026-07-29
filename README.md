@@ -62,6 +62,17 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m dombori backfill [--station TSZ] [--chunk-years N]
 ```
 
+## Statisztikai Bartal-előrejelzés
+
+A `daily` job (és a kézi `bartal-forecast` parancs) 6 napos előrejelzést számol
+a Bartal (142062) állomásra: **perzisztencia + szezonális drift** (a 2005 utáni
+napi adatok naptári-nap-ablakos mediánja) + **empirikus p5–p95 hibasáv**.
+A Duna-szint korrelációja mérten elhanyagolható (Δ-korreláció ≈ 0, a holtág
+zsilipekkel kezelt rendszer), ezért a Duna csak eseményjelző: ha a Hydroinfo
+Duna-előrejelzés eléri a 400 cm-t, a run `szivornya_lehetseges` jelzést kap.
+Az eredmény a `forecast_runs`/`forecast_points` táblákba kerül
+(`source='statisztikai'`), a dashboardon saját panel + szivornya-stat mutatja.
+
 ## Történeti esemény-annotációk
 
 A `holtag_events` tábla (seed: `sql/002_events.sql`) a holtág vízállás
