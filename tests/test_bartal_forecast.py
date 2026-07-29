@@ -1,0 +1,81 @@
+"""A statisztikai Bartal-előrejelzés pure függvényeinek tesztjei."""
+
+from datetime import date, timedelta
+
+import pytest
+
+from dombori.bartal_forecast import (
+    ForecastError,
+    _doy_distance,
+    _k_day_changes,
+    _percentile,
+    compute_forecast,
+)
+
+
+def _flat_series(start: date, days: int, value: float = 100.0):
+    return tuple((start + timedelta(days=i), value) for i in range(days))
+
+
+def _seasonal_series(start: date, days: int):
+    """Nyáron lassan csökkenő, télen emelkedő szintetikus sor."""
+    rows = []
+    value = 100.0
+    for i in range(days):
+        day = start + timedelta(days=i)
+        value += -0.2 if 150 <= day.timetuple().tm_yday <= 250 else 0.1
+        rows.append((day, round(value, 2)))
+    return tuple(rows)
+
+
+def test_doy_distance_wraps_around_new_year():
+    assert _doy_distance(1, 366) == 1
+    assert _doy_distance(10, 350) == 26
+    assert _doy_distance(100, 100) == 0
+
+
+def test_percentile_interpolates():
+    values = (0.0, 10.0)
+    assert _percentile(values, 0.5) == 5.0
+    assert _percentile(values, 0.0) == 0.0
+    assert _percentile(values, 1.0) == 10.0
+
+
+def test_k_day_changes_respects_window():
+    series = _flat_series(date(2020, 1, 1), 400)
+    changes = _k_day_changes(series, anchor_doy=15, k=3, window=5)
+    assert changes and all(c == 0.0 for c in changes)
+
+
+def test_flat_series_forecast_is_persistence():
+    series = _flat_series(date(2010, 1, 1), 5000)
+    last_day, last_value = series[-1]
+    points = compute_forecast(series, last_day, last_value)
+    assert len(points) == 6
+    assert all(p.value_cm == last_value for p in points)
+    assert all(p.error_band_cm == 0.5 for p in points)  # minimum sáv
+    assert points[0].target_ts.date() == last_day + timedelta(days=1)
+    assert points[-1].target_ts.date() == last_day + timedelta(days=6)
+
+
+def test_seasonal_series_forecast_has_drift_direction():
+    series = _seasonal_series(date(2005, 1, 1), 7000)
+    last_day, last_value = series[-1]
+    points = compute_forecast(series, last_day, last_value)
+    doy = last_day.timetuple().tm_yday
+    expected_sign = -1 if 150 <= doy <= 250 else 1
+    drift = points[-1].value_cm - last_value
+    assert drift * expected_sign > 0
+
+
+def test_short_series_raises():
+    series = _flat_series(date(2024, 1, 1), 100)
+    with pytest.raises(ForecastError):
+        compute_forecast(series, series[-1][0], series[-1][1])
+
+
+def test_forecast_values_are_immutable_inputs():
+    series = _flat_series(date(2010, 1, 1), 3000)
+    snapshot = tuple(series)
+    compute_forecast(series, series[-1][0], series[-1][1])
+    assert series == snapshot

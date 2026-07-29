@@ -101,3 +101,13 @@ Tények, amiket a kód nem mond el magától. Frissítsd, ha újat tanulsz!
   `ingestion_runs` bejegyzés; 2 üres 10 éves chunk után áll le.
 - Volumen a teljes betöltés után: ~64k napi aggregátum-sor + gördülő ~5.4k
   15 perces sor — elhanyagolható.
+
+## Bartal statisztikai előrejelzés (v0.3.0)
+
+- Duna→Bartal korreláció MÉRVE (2005–2026): szint 0,40; heti Δ 0,28;
+  Duna-szint → Bartal-változás 0,001 — a holtág zsilipkezelt, a Duna NEM
+  prediktor. A modell: perzisztencia + szezonális drift (DOY±10 medián)
+  + p5–p95 sáv; 6 napos autokorreláció 0,97, tipikus 6 napos sáv ±4-5 cm.
+- `bartal_forecast.py` a daily jobból fut; `source='statisztikai'`,
+  raw JSON snapshot a data/raw/-ba, `detail.szivornya_lehetseges` = a
+  Hydroinfo Duna-max ≥ 400 cm.

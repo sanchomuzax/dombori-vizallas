@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 import requests
 from psycopg import sql
 
-from dombori import aggregate, backfill, db, forecasts, hydroinfo, retention, runs, vizugy_client
+from dombori import aggregate, backfill, bartal_forecast, db, forecasts, hydroinfo, retention, runs, vizugy_client
 from dombori.config import Config, ConfigError, load_config
 from dombori.observations import parse_timeseries, upsert_observations
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 _BUDAPEST_TZ = ZoneInfo("Europe/Budapest")
 _STATIONS = (550, 142062)
-_SCHEMA_PATH = "sql/001_schema.sql"
+_SCHEMA_PATHS = ("sql/001_schema.sql", "sql/002_events.sql", "sql/003_bartal_forecast.sql")
 _RO_ROLE_NAME = "dombori_ro"
 
 _STATION_FIELD_MAP = {
@@ -119,8 +119,9 @@ def _configure_ro_role(conn, config: Config) -> None:
 
 
 def cmd_init_db(conn, config: Config, _args: argparse.Namespace) -> int:
-    db.execute_sql_file(conn, _SCHEMA_PATH)
-    logger.info("Applied schema from %s", _SCHEMA_PATH)
+    for schema_path in _SCHEMA_PATHS:
+        db.execute_sql_file(conn, schema_path)
+        logger.info("Applied schema from %s", schema_path)
 
     session = requests.Session()
     seeded = _seed_stations(conn, session)
@@ -217,16 +218,21 @@ def cmd_hydroinfo(conn, config: Config, _args: argparse.Namespace) -> int:
 
 
 def cmd_daily(conn, config: Config, args: argparse.Namespace) -> int:
-    del config
     run_id = runs.start_run(conn, "daily")
     try:
         aggregated = aggregate.upsert_daily_aggregates(conn, lookback_days=35)
         pruned = retention.prune_observations(conn, keep_days=28, dry_run=args.dry_run)
+        forecast_run_id = bartal_forecast.run_bartal_forecast(conn, config)
         runs.finish_run(
             conn,
             run_id,
             "ok",
-            detail={"aggregated": aggregated, "pruned": pruned, "dry_run": args.dry_run},
+            detail={
+                "aggregated": aggregated,
+                "pruned": pruned,
+                "dry_run": args.dry_run,
+                "bartal_forecast_run": forecast_run_id,
+            },
         )
         return 0
     except Exception as exc:
@@ -263,6 +269,10 @@ def _build_parser() -> argparse.ArgumentParser:
     daily_parser = subparsers.add_parser("daily", help="Recompute daily aggregates and prune raw data")
     daily_parser.add_argument("--dry-run", action="store_true", help="Only count rows that would be pruned")
 
+    subparsers.add_parser(
+        "bartal-forecast", help="Compute the statistical 6-day Bartal forecast"
+    )
+
     backfill_parser = subparsers.add_parser("backfill", help="Backfill historical observations")
     backfill_parser.add_argument("--station", type=int, default=None, help="Backfill only this station tsz")
     backfill_parser.add_argument("--chunk-years", type=int, default=10, help="Years per backfill chunk")
@@ -271,8 +281,23 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def cmd_bartal_forecast(conn, config: Config, _args: argparse.Namespace) -> int:
+    run_id = runs.start_run(conn, "bartal-forecast")
+    try:
+        forecast_run_id = bartal_forecast.run_bartal_forecast(conn, config)
+        status = "ok" if forecast_run_id is not None else "noop"
+        runs.finish_run(conn, run_id, status, detail={"forecast_run": forecast_run_id})
+        return 0
+    except Exception as exc:
+        conn.rollback()
+        runs.finish_run(conn, run_id, "error", detail={"error": str(exc)})
+        logger.error("bartal-forecast job failed: %s", exc)
+        raise
+
+
 _HANDLERS = {
     "init-db": cmd_init_db,
+    "bartal-forecast": cmd_bartal_forecast,
     "collect": cmd_collect,
     "hydroinfo": cmd_hydroinfo,
     "daily": cmd_daily,
