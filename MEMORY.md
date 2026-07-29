@@ -72,6 +72,15 @@ Tények, amiket a kód nem mond el magától. Frissítsd, ha újat tanulsz!
 - A user maga is szerkeszti a dashboardokat a UI-ban — MCP-ből CSAK célzott
   patch-műveletet (`operations`) használj, teljes felülírást soha, és a
   színeit/elrendezését ne írd felül!
+- **Kamera-panelek** (Paks/Baja, ADUVIZIG `GetLastPic.aspx?paks|baja2`):
+  text panel HTML módban. A szerver CSAK a csupasz `?paks` queryt tűri
+  (bármilyen extra param → HTML hibaoldal), ezért cache-törés a PATH
+  kis-nagybetű-permutálásával megy (IIS érzéketlen rá, a böngésző-cache nem).
+  A `<script>` blokk innerHTML-ből SOSEM fut — a logika az `<img onload>`
+  attribútumban bootstrapel, és a dashboard URL `refresh=` paraméteréből
+  veszi az időzítést. Előfeltétel: `disable_sanitize_html = true` a
+  grafana.ini `[panels]` szekciójában (2026-07-29-én bekapcsolva).
+  n8n-alapú proxy TILOS ehhez (user explicit döntése).
 - **Esemény-annotációk**: `holtag_events` tábla (seed `sql/002_events.sql`,
   csak vízállás-releváns események, `impact` pozitiv/negativ) → a fő
   dashboardon két annotáció-réteg (zöld/piros), SQL-lel:
