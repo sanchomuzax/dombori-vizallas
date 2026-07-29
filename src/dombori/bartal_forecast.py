@@ -113,6 +113,36 @@ def compute_forecast(
     return tuple(points)
 
 
+def expand_to_6h_grid(
+    daily_points: tuple[StatPoint, ...], last_day: date, last_value: float
+) -> tuple[StatPoint, ...]:
+    """Pure: a napi pontok lineáris interpolációja 6 órás rácsra.
+
+    A kiindulópont (k=0) az utolsó mért napi átlag (dél), drift és sáv nulla;
+    így a kimenet ugyanolyan sűrű, mint a Hydroinfo 6 órás előrejelzése.
+    """
+    anchor = datetime.combine(last_day, time(12, 0), TZ)
+    knots = [(0.0, last_value, 0.0)] + [
+        (float(i + 1), p.value_cm, p.error_band_cm) for i, p in enumerate(daily_points)
+    ]
+    grid = []
+    steps_per_day = 4
+    for step in range(1, len(daily_points) * steps_per_day + 1):
+        k = step / steps_per_day
+        lo = min((step - 1) // steps_per_day, len(knots) - 2)
+        frac = k - lo
+        _, v0, e0 = knots[lo]
+        _, v1, e1 = knots[lo + 1]
+        grid.append(
+            StatPoint(
+                target_ts=anchor + timedelta(hours=6 * step),
+                value_cm=round(v0 + (v1 - v0) * frac, 1),
+                error_band_cm=round(max(e0 + (e1 - e0) * frac, 0.5), 1),
+            )
+        )
+    return tuple(grid)
+
+
 def _load_series(conn: psycopg.Connection) -> tuple[tuple[date, float], ...]:
     with conn.cursor() as cur:
         cur.execute(
@@ -140,7 +170,8 @@ def run_bartal_forecast(conn: psycopg.Connection, config) -> int | None:
     if not series:
         raise ForecastError("Nincs Bartal napi adat")
     last_day, last_value = series[-1]
-    points = compute_forecast(series, last_day, last_value)
+    daily_points = compute_forecast(series, last_day, last_value)
+    points = expand_to_6h_grid(daily_points, last_day, last_value)
 
     duna_max = _duna_forecast_max(conn)
     siphon_possible = duna_max is not None and duna_max >= SIPHON_MIN_CM

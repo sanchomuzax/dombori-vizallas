@@ -79,3 +79,32 @@ def test_forecast_values_are_immutable_inputs():
     snapshot = tuple(series)
     compute_forecast(series, series[-1][0], series[-1][1])
     assert series == snapshot
+
+
+def test_expand_to_6h_grid():
+    from datetime import datetime
+    from dombori.bartal_forecast import StatPoint, expand_to_6h_grid, TZ
+    from datetime import time as dtime
+
+    last_day = date(2026, 7, 29)
+    daily = tuple(
+        StatPoint(
+            target_ts=datetime.combine(last_day + timedelta(days=k), dtime(12, 0), TZ),
+            value_cm=100.0 + k,          # naponta +1 cm
+            error_band_cm=float(k),      # naponta +1 cm sáv
+        )
+        for k in range(1, 7)
+    )
+    grid = expand_to_6h_grid(daily, last_day, 100.0)
+    assert len(grid) == 24
+    # első köztes pont: +6h, negyed napi drift
+    assert grid[0].value_cm == 100.2 or grid[0].value_cm == 100.3
+    # napi rácspontok pontosan a napi értékek
+    assert grid[3].value_cm == 101.0 and grid[7].value_cm == 102.0
+    assert grid[-1].value_cm == 106.0 and grid[-1].error_band_cm == 6.0
+    # sáv monoton nem csökken és minimum 0.5
+    bands = [p.error_band_cm for p in grid]
+    assert bands == sorted(bands) and bands[0] >= 0.5
+    # 6 órás lépésköz
+    deltas = {(grid[i + 1].target_ts - grid[i].target_ts).total_seconds() for i in range(23)}
+    assert deltas == {21600.0}
