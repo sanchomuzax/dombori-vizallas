@@ -229,7 +229,7 @@ def build() -> dict:
         ],
         "preload": False, "refresh": "", "schemaVersion": 42,
         "tags": ["dombori", "vizallas", "duna", "vízállás"],
-        "links": [{"asDropdown": true, "icon": "external link", "includeVars": false, "keepTime": false, "tags": ["vízállás"], "targetBlank": false, "title": "menü", "tooltip": "", "type": "dashboards", "url": ""}],
+        "links": [{"asDropdown": True, "icon": "external link", "includeVars": False, "keepTime": False, "tags": ["vízállás"], "targetBlank": False, "title": "menü", "tooltip": "", "type": "dashboards", "url": ""}],
         "templating": {"list": [
             variable("elso_ev", "Első év",
                      "SELECT min(extract(year FROM day_local))::int FROM daily_aggregates"

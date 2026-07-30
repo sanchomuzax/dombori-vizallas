@@ -138,7 +138,7 @@ def build() -> dict:
                                   "name": "Annotations & Alerts", "type": "dashboard"}]},
         "editable": True, "fiscalYearStartMonth": 0, "graphTooltip": 0, "id": None,
         "liveNow": False,
-        "links": [{"asDropdown": true, "icon": "external link", "includeVars": false, "keepTime": false, "tags": ["vízállás"], "targetBlank": false, "title": "menü", "tooltip": "", "type": "dashboards", "url": ""}],
+        "links": [{"asDropdown": True, "icon": "external link", "includeVars": False, "keepTime": False, "tags": ["vízállás"], "targetBlank": False, "title": "menü", "tooltip": "", "type": "dashboards", "url": ""}],
         "panels": panels, "preload": False, "refresh": "5m", "schemaVersion": 42,
         "tags": ["dombori", "vizallas", "duna", "orszagos", "vízállás"],
         "time": {"from": "now-28d", "to": "now+6d"}, "timepicker": {},
