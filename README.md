@@ -101,7 +101,9 @@ jelszava a Grafana saját titkos tárában marad.
 |---|---|
 | `dombori-vizallas.json` | fő dashboard (aktuális szintek, előrejelzések, kamerák, történelmi sávok, gyűjtés-állapot) |
 | `dombori-szezonalis.json` | szezonális összevetés (évek egymáson) — **generált**, ne kézzel szerkeszd |
-| `build_szezonalis.py` | a szezonális dashboard generátora (~200 évenkénti szín-override) |
+| `build_szezonalis.py` | a szezonális dashboardok generátora (dombori + orszagos mód) |
+| `orszagos-vizallas.json` + `build_orszagos.py` | „Országos vízállás — Duna" (generált) |
+| `orszagos-szezonalis.json` | „Országos vízállás — szezonális összevetés" (generált) |
 
 Frissítés: `python3 grafana/build_szezonalis.py > grafana/dombori-szezonalis.json`
 Importálás: Grafana → Dashboards → New → Import → *Upload JSON file*.

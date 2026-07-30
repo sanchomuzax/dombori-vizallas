@@ -51,7 +51,7 @@
       "id": 1,
       "type": "stat",
       "title": "Komárom (belépés, 1768 fkm)",
-      "description": "Tsz 5 · LKV −12 cm · LNV 845 cm",
+      "description": "Tsz 5 · LKV -12 cm · LNV 845 cm",
       "gridPos": {
         "x": 0,
         "y": 0,
@@ -185,7 +185,7 @@
       "id": 3,
       "type": "stat",
       "title": "Paks (atomerőmű, 1531 fkm)",
-      "description": "Tsz 549 · LKV −97 cm · LNV 891 cm",
+      "description": "Tsz 549 · LKV -97 cm · LNV 891 cm",
       "gridPos": {
         "x": 12,
         "y": 0,
@@ -252,7 +252,7 @@
       "id": 4,
       "type": "stat",
       "title": "Mohács (kilépés, 1447 fkm)",
-      "description": "Tsz 831 · LKV 26 cm · LNV 984 cm (országos rekord, 2013)",
+      "description": "Tsz 831 · LKV 26 cm · LNV 984 cm",
       "gridPos": {
         "x": 18,
         "y": 0,
@@ -316,15 +316,15 @@
       }
     },
     {
-      "id": 5,
+      "id": 6,
       "type": "timeseries",
-      "title": "Duna vízállás a négy ponton — mért + Hydroinfo előrejelzés",
-      "description": "Folytonos = mért (28 napnál régebbre archív napi átlag), szaggatott = a legutóbbi Hydroinfo-előrejelzés. Színek: kék = Komárom, lila = Budapest, narancs = Paks, zöld = Mohács.",
+      "title": "Komárom: mért + előrejelzés (±sáv)",
+      "description": "Zöld terület LKV (-12 cm) fölött, piros LNV (845 cm) fölött.",
       "gridPos": {
         "x": 0,
         "y": 5,
-        "w": 24,
-        "h": 12
+        "w": 12,
+        "h": 10
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -338,7 +338,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_DOMBORI}"
           },
-          "rawSql": "SELECT o.ts_utc AS \"time\", CASE o.station_tsz WHEN 5 THEN 'Komárom' WHEN 1026 THEN 'Budapest' WHEN 549 THEN 'Paks' ELSE 'Mohács' END AS metric, o.value_cm FROM observations o WHERE o.station_tsz IN (5, 1026, 549, 831) AND $__timeFilter(o.ts_utc) UNION ALL SELECT (d.day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", CASE d.station_tsz WHEN 5 THEN 'Komárom' WHEN 1026 THEN 'Budapest' WHEN 549 THEN 'Paks' ELSE 'Mohács' END AS metric, d.mean_cm FROM daily_aggregates d WHERE d.station_tsz IN (5, 1026, 549, 831) AND $__timeFilter(d.day_local) AND d.day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1"
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 5 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 5 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1"
         },
         {
           "refId": "B",
@@ -347,7 +347,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_DOMBORI}"
           },
-          "rawSql": "SELECT target_ts AS \"time\", value_cm AS \"Komárom előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442522H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 5 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"előrejelzés\" FROM last_obs UNION ALL SELECT target_ts, value_cm FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442522H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
         },
         {
           "refId": "C",
@@ -356,25 +356,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_DOMBORI}"
           },
-          "rawSql": "SELECT target_ts AS \"time\", value_cm AS \"Budapest előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442027H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
-        },
-        {
-          "refId": "D",
-          "format": "time_series",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "${DS_DOMBORI}"
-          },
-          "rawSql": "SELECT target_ts AS \"time\", value_cm AS \"Paks előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442030H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
-        },
-        {
-          "refId": "E",
-          "format": "time_series",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "${DS_DOMBORI}"
-          },
-          "rawSql": "SELECT target_ts AS \"time\", value_cm AS \"Mohács előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442032H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 5 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"felső\", value_cm AS \"alsó\" FROM last_obs UNION ALL SELECT target_ts, value_cm + coalesce(error_band_cm, 0), value_cm - coalesce(error_band_cm, 0) FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442522H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
         }
       ],
       "options": {
@@ -389,7 +371,7 @@
         "tooltip": {
           "hideZeros": false,
           "mode": "multi",
-          "sort": "desc"
+          "sort": "none"
         }
       },
       "fieldConfig": {
@@ -403,8 +385,10 @@
             "showPoints": "auto",
             "pointSize": 5,
             "thresholdsStyle": {
-              "mode": "off"
-            }
+              "mode": "area"
+            },
+            "axisSoftMin": -60,
+            "axisSoftMax": 900
           },
           "thresholds": {
             "mode": "absolute",
@@ -412,6 +396,14 @@
               {
                 "color": "transparent",
                 "value": null
+              },
+              {
+                "color": "green",
+                "value": -12
+              },
+              {
+                "color": "red",
+                "value": 845
               }
             ]
           }
@@ -419,68 +411,23 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^Komárom.*"
+              "id": "byName",
+              "options": "mért"
             },
             "properties": [
               {
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "#2a78d6"
+                  "fixedColor": "blue"
                 }
               }
             ]
           },
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^Budapest.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#4a3aa7"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^Paks.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#eb6834"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^Mohács.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#1baf7a"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*előrejelzés$"
+              "id": "byName",
+              "options": "előrejelzés"
             },
             "properties": [
               {
@@ -494,8 +441,670 @@
                 }
               },
               {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "felső"
+            },
+            "properties": [
+              {
                 "id": "custom.lineWidth",
-                "value": 2
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "alsó"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 15
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alsó"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Budapest: mért + előrejelzés (±sáv)",
+      "description": "Zöld terület LKV (33 cm) fölött, piros LNV (891 cm) fölött.",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_DOMBORI}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 1026 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 1026 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 1026 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"előrejelzés\" FROM last_obs UNION ALL SELECT target_ts, value_cm FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442027H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 1026 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"felső\", value_cm AS \"alsó\" FROM last_obs UNION ALL SELECT target_ts, value_cm + coalesce(error_band_cm, 0), value_cm - coalesce(error_band_cm, 0) FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442027H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthcm",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "thresholdsStyle": {
+              "mode": "area"
+            },
+            "axisSoftMin": -20,
+            "axisSoftMax": 950
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 33
+              },
+              {
+                "color": "red",
+                "value": 891
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mért"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "előrejelzés"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "felső"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "alsó"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 15
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alsó"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Paks: mért + előrejelzés (±sáv)",
+      "description": "Zöld terület LKV (-97 cm) fölött, piros LNV (891 cm) fölött.",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_DOMBORI}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 549 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 549 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 549 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"előrejelzés\" FROM last_obs UNION ALL SELECT target_ts, value_cm FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442030H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 549 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"felső\", value_cm AS \"alsó\" FROM last_obs UNION ALL SELECT target_ts, value_cm + coalesce(error_band_cm, 0), value_cm - coalesce(error_band_cm, 0) FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442030H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthcm",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "thresholdsStyle": {
+              "mode": "area"
+            },
+            "axisSoftMin": -140,
+            "axisSoftMax": 950
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": -97
+              },
+              {
+                "color": "red",
+                "value": 891
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mért"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "előrejelzés"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "felső"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "alsó"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 15
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alsó"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Mohács: mért + előrejelzés (±sáv)",
+      "description": "Zöld terület LKV (26 cm) fölött, piros LNV (984 cm) fölött.",
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_DOMBORI}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 831 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 831 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 831 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"előrejelzés\" FROM last_obs UNION ALL SELECT target_ts, value_cm FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442032H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        },
+        {
+          "refId": "C",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_DOMBORI}"
+          },
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 831 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"felső\", value_cm AS \"alsó\" FROM last_obs UNION ALL SELECT target_ts, value_cm + coalesce(error_band_cm, 0), value_cm - coalesce(error_band_cm, 0) FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442032H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthcm",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": true,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "thresholdsStyle": {
+              "mode": "area"
+            },
+            "axisSoftMin": -20,
+            "axisSoftMax": 1040
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 26
+              },
+              {
+                "color": "red",
+                "value": 984
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mért"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "előrejelzés"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "felső"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "alsó"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 15
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alsó"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
               }
             ]
           }

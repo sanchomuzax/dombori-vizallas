@@ -53,6 +53,22 @@ FORECAST_SQL = (
 )
 
 
+ANCHORED_FORECAST_SQL = (
+    "SELECT make_date(extract(year FROM now())::int, extract(month FROM day_local)::int,"
+    " extract(day FROM day_local)::int)::timestamptz AS \"time\", mean_cm AS \"előrejelzés\""
+    " FROM daily_aggregates WHERE station_tsz = {tsz} AND day_local ="
+    " (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = {tsz})"
+    " UNION ALL SELECT make_date(extract(year FROM now())::int,"
+    " extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int,"
+    " extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz,"
+    " round(avg(value_cm), 1) FROM forecast_points WHERE point_type = 'forecast'"
+    " AND (target_ts AT TIME ZONE 'Europe/Budapest')::date >"
+    " (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = {tsz})"
+    " AND run_id = (SELECT id FROM forecast_runs WHERE {run_filter}"
+    " ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
+)
+
+
 def _lerp(a: int, b: int, t: float) -> int:
     return round(a + (b - a) * t)
 
@@ -127,14 +143,14 @@ def custom_defaults(threshold_mode: str) -> dict:
 
 
 def panel(*, pid, tsz, title, description, first_year_var, y, thresholds,
-          threshold_mode, run_filter, forecast, decades=False) -> dict:
+          threshold_mode, run_filter, forecast, decades=False, anchored=False) -> dict:
     targets = [{"datasource": {"type": "grafana-postgresql-datasource", "uid": DS},
                 "format": "time_series", "refId": "A",
                 "rawSql": MEASURED_SQL.format(tsz=tsz)}]
     if forecast:
         targets.append({"datasource": {"type": "grafana-postgresql-datasource", "uid": DS},
                         "format": "time_series", "refId": "B",
-                        "rawSql": FORECAST_SQL.format(run_filter=run_filter)})
+                        "rawSql": (ANCHORED_FORECAST_SQL if anchored else FORECAST_SQL).format(run_filter=run_filter, tsz=tsz)})
     return {
         "datasource": {"type": "grafana-postgresql-datasource", "uid": DS},
         "description": description,
@@ -249,8 +265,10 @@ def build_orszagos() -> dict:
                         f" narancs = tavalyi, vastag piros = idei; sötétpiros szaggatott ="
                         f" Hydroinfo előrejelzés. Piros vonal: LNV {lnv} cm.",
             thresholds=[{"color": "transparent", "value": 0}, {"color": "red", "value": lnv}],
-            threshold_mode="line", run_filter=f"station_code = '{code}'", forecast=True))
+            threshold_mode="line", run_filter=f"station_code = '{code}'",
+            forecast=True, anchored=True))
     base["panels"] = panels
+    base["annotations"]["list"] = base["annotations"]["list"][:1]
     base["templating"]["list"] = [
         variable("elso_ev", "Első év",
                  "SELECT min(extract(year FROM day_local))::int FROM daily_aggregates"
