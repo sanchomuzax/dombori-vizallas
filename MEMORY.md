@@ -90,8 +90,8 @@ Tények, amiket a kód nem mond el magától. Frissítsd, ha újat tanulsz!
 ## Üzemeltetés
 
 - DB: Docker `dombori_db` (postgres:17-alpine), named volume `dombori_pgdata`,
-  port `127.0.0.1:5434`. a host alapértelmezett Postgres-portjai másra foglaltak,
-  ezért az eltérő port.
+  port `127.0.0.1:5434` (a host alapértelmezett Postgres-portjai másra
+  foglaltak, ezért az eltérő port).
 - Grafana read-only role: `dombori_ro` — jelszó a `.env.local`-ban
   (`DOMBORI_RO_PASSWORD`); az `init-db` idempotensen (újra)beállítja.
 - psycopg3 `executemany` **kumulatív** rowcountot ad — az upsert-számlálók
