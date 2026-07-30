@@ -6,10 +6,17 @@ aggregálás, Hydroinfo-előrejelzések verziózott tárolása, Grafana dashboar
 
 ## Állomások
 
-| Állomás | Törzsszám | Meder | Jellemzők |
-|---|---|---|---|
-| Duna – Dombori | `550` | Duna, 1506,8 fkm | Npt 83,52 mBf; LKV −87 cm; LNV 916 cm; adatok **1901-től** |
-| Fadd (Dombori), volt Bartal zsilip | `142062` | Faddi-Holt-Duna | Npt 86,53 mBf; LKV 35; LNV 208; KF 170/190/200 cm; adatok **1973-tól** |
+| Állomás | Törzsszám | Hydroinfo | Meder | Jellemzők |
+|---|---|---|---|---|
+| Duna – Komárom | `5` | 442522H | Duna, 1768,4 fkm | LKV −12; LNV 845; adatok 1901-től |
+| Duna – Budapest | `1026` | 442027H | Duna, 1646,5 fkm | LKV 33; LNV 891; adatok 1901-től |
+| Duna – Paks | `549` | 442030H | Duna, 1531,3 fkm | LKV −97; LNV 891; adatok 1901-től |
+| Duna – Dombori | `550` | 442540H | Duna, 1506,8 fkm | Npt 83,52 mBf; LKV −87; LNV 916; adatok 1901-től |
+| Duna – Mohács | `831` | 442032H | Duna, 1446,9 fkm | LKV 26; LNV 984 (országos rekord); adatok 1901-től |
+| Fadd (Dombori), volt Bartal zsilip | `142062` | — | Faddi-Holt-Duna | Npt 86,53 mBf; KF 170/190/200; adatok 1973-tól |
+
+Új állomás felvétele: sor a `src/dombori/stations.py` registry-be, majd
+`init-db` (seed) és `backfill --station <tsz>`.
 
 ## Adatforrások
 

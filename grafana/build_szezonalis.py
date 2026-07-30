@@ -5,7 +5,12 @@ A dashboard évenként egy-egy sorozatot rajzol egymásra, és minden évhez saj
 szín-override tartozik (sötétszürke → kék gradiens). Ez ~130 override
 panelenként, amit generálni sokkal olvashatóbb, mint kézzel verziózni.
 
-Futtatás:  python3 grafana/build_szezonalis.py > grafana/dombori-szezonalis.json
+Futtatás:
+  python3 grafana/build_szezonalis.py > grafana/dombori-szezonalis.json
+  python3 grafana/build_szezonalis.py orszagos > grafana/orszagos-szezonalis.json
+
+Az országos változat évtizedes (nem évenkénti) gradienst használ: negyed
+annyi override, szemre azonos hatás.
 """
 
 from __future__ import annotations
@@ -89,6 +94,25 @@ def overrides(first_year: int, with_forecast: bool) -> list[dict]:
     return out
 
 
+def decade_overrides(first_year: int, with_forecast: bool) -> list[dict]:
+    """Évtizedenkénti gradiens-override-ok (könnyű változat, ~15 szabály)."""
+    out = []
+    for decade in range(first_year // 10, 204):
+        mid = min(decade * 10 + 5, FUTURE_START_YEAR + len(FUTURE_COLORS) - 1)
+        out.append({"matcher": {"id": "byRegexp", "options": f"^{decade}\\d$"},
+                    "properties": [_fixed(year_color(max(mid, first_year), first_year))]})
+    out.append({"matcher": {"id": "byRegexp", "options": "^tavalyi.*"},
+                "properties": [_fixed("orange"), {"id": "custom.lineWidth", "value": 2}, _visible()]})
+    out.append({"matcher": {"id": "byRegexp", "options": "^idei.*"},
+                "properties": [_fixed("red"), {"id": "custom.lineWidth", "value": 3}, _visible()]})
+    if with_forecast:
+        out.append({"matcher": {"id": "byName", "options": "előrejelzés"},
+                    "properties": [_fixed("dark-red"), {"id": "custom.lineWidth", "value": 3},
+                                   {"id": "custom.lineStyle", "value": {"dash": [3, 3], "fill": "dash"}},
+                                   _visible()]})
+    return out
+
+
 def custom_defaults(threshold_mode: str) -> dict:
     return {
         "axisBorderShow": False, "axisCenteredZero": False, "axisColorMode": "text",
@@ -103,7 +127,7 @@ def custom_defaults(threshold_mode: str) -> dict:
 
 
 def panel(*, pid, tsz, title, description, first_year_var, y, thresholds,
-          threshold_mode, run_filter, forecast) -> dict:
+          threshold_mode, run_filter, forecast, decades=False) -> dict:
     targets = [{"datasource": {"type": "grafana-postgresql-datasource", "uid": DS},
                 "format": "time_series", "refId": "A",
                 "rawSql": MEASURED_SQL.format(tsz=tsz)}]
@@ -119,7 +143,7 @@ def panel(*, pid, tsz, title, description, first_year_var, y, thresholds,
                          "custom": custom_defaults(threshold_mode),
                          "thresholds": {"mode": "absolute", "steps": thresholds},
                          "unit": "lengthcm"},
-            "overrides": overrides(first_year_var, forecast),
+            "overrides": (decade_overrides if decades else overrides)(first_year_var, forecast),
         },
         "gridPos": {"h": 13, "w": 24, "x": 0, "y": y},
         "id": pid,
@@ -205,5 +229,40 @@ def build() -> dict:
     }
 
 
+ORSZAGOS_STATIONS = (
+    ("Komárom", 5, "442522H", 845),
+    ("Budapest", 1026, "442027H", 891),
+    ("Paks", 549, "442030H", 891),
+    ("Mohács", 831, "442032H", 984),
+)
+
+
+def build_orszagos() -> dict:
+    base = build()
+    panels = []
+    for i, (name, tsz, code, lnv) in enumerate(ORSZAGOS_STATIONS):
+        panels.append(panel(
+            pid=i + 1, tsz=tsz, y=i * 13, first_year_var=1901, decades=True,
+            title=f"{name} — napi átlag évenként egymáson (${{elso_ev}}–${{aktualis_ev}})",
+            description=f"Minden év az aktuális év naptárára vetítve — évfüggetlen."
+                        f" Színskála: sötétszürke (régi) → kék (új) évtizedenként;"
+                        f" narancs = tavalyi, vastag piros = idei; sötétpiros szaggatott ="
+                        f" Hydroinfo előrejelzés. Piros vonal: LNV {lnv} cm.",
+            thresholds=[{"color": "transparent", "value": 0}, {"color": "red", "value": lnv}],
+            threshold_mode="line", run_filter=f"station_code = '{code}'", forecast=True))
+    base["panels"] = panels
+    base["templating"]["list"] = [
+        variable("elso_ev", "Első év",
+                 "SELECT min(extract(year FROM day_local))::int FROM daily_aggregates"
+                 " WHERE station_tsz IN (5, 1026, 549, 831)"),
+        variable("aktualis_ev", "Aktuális év", "SELECT extract(year FROM now())::int"),
+    ]
+    base["title"] = "Országos vízállás — szezonális összevetés"
+    base["uid"] = "orszagos-vizallas-szezonalis"
+    return base
+
+
 if __name__ == "__main__":
-    print(json.dumps(build(), ensure_ascii=False, indent=2))
+    import sys
+    dashboard = build_orszagos() if "orszagos" in sys.argv[1:] else build()
+    print(json.dumps(dashboard, ensure_ascii=False, indent=2))

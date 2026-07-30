@@ -27,9 +27,11 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
-TABLE_URL = "https://www.hydroinfo.hu/tables/442540H.html"
-IMAGEMAP_URL = "https://www.hydroinfo.hu/Html/hidelo/elore.php?all=442540H"
 STATION_CODE = "442540H"
+_TABLE_URL_TMPL = "https://www.hydroinfo.hu/tables/{code}.html"
+_IMAGEMAP_URL_TMPL = "https://www.hydroinfo.hu/Html/hidelo/elore.php?all={code}"
+TABLE_URL = _TABLE_URL_TMPL.format(code=STATION_CODE)
+IMAGEMAP_URL = _IMAGEMAP_URL_TMPL.format(code=STATION_CODE)
 
 _BUDAPEST_TZ = ZoneInfo("Europe/Budapest")
 
@@ -117,16 +119,19 @@ def _fetch(url: str, session: requests.Session, headers: dict[str, str]) -> requ
         raise HydroinfoError(f"GET {url} failed: {exc}") from exc
 
 
-def fetch_table(session: requests.Session, etag: str | None = None) -> FetchResult:
-    """Fetch the forecast table page, honoring a prior ETag if given."""
+def fetch_table(
+    session: requests.Session, etag: str | None = None, code: str = STATION_CODE
+) -> FetchResult:
+    """Fetch a station's forecast table page, honoring a prior ETag if given."""
+    url = _TABLE_URL_TMPL.format(code=code)
     headers = {"If-None-Match": etag} if etag else {}
-    response = _fetch(TABLE_URL, session, headers)
+    response = _fetch(url, session, headers)
 
     if response.status_code == 304:
         return FetchResult(status=304, raw=None, etag=etag, text=None)
     if response.status_code != 200:
         raise HydroinfoError(
-            f"Table fetch returned status {response.status_code} for {TABLE_URL}"
+            f"Table fetch returned status {response.status_code} for {url}"
         )
 
     raw = response.content
@@ -134,12 +139,13 @@ def fetch_table(session: requests.Session, etag: str | None = None) -> FetchResu
     return FetchResult(status=200, raw=raw, etag=response.headers.get("ETag"), text=text)
 
 
-def fetch_imagemap(session: requests.Session) -> FetchResult:
-    """Fetch the imagemap fallback page. No conditional-GET support."""
-    response = _fetch(IMAGEMAP_URL, session, {})
+def fetch_imagemap(session: requests.Session, code: str = STATION_CODE) -> FetchResult:
+    """Fetch a station's imagemap fallback page. No conditional-GET support."""
+    url = _IMAGEMAP_URL_TMPL.format(code=code)
+    response = _fetch(url, session, {})
     if response.status_code != 200:
         raise HydroinfoError(
-            f"Imagemap fetch returned status {response.status_code} for {IMAGEMAP_URL}"
+            f"Imagemap fetch returned status {response.status_code} for {url}"
         )
     raw = response.content
     text = raw.decode("iso-8859-2")

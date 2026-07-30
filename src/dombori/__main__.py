@@ -12,14 +12,14 @@ from zoneinfo import ZoneInfo
 import requests
 from psycopg import sql
 
-from dombori import aggregate, backfill, bartal_forecast, db, forecasts, hydroinfo, retention, runs, vizugy_client
+from dombori import aggregate, backfill, bartal_forecast, db, forecasts, hydroinfo, retention, runs, stations, vizugy_client
 from dombori.config import Config, ConfigError, load_config
 from dombori.observations import parse_timeseries, upsert_observations
 
 logger = logging.getLogger(__name__)
 
 _BUDAPEST_TZ = ZoneInfo("Europe/Budapest")
-_STATIONS = (550, 142062)
+_STATIONS = stations.ALL_TSZ
 _SCHEMA_PATHS = ("sql/001_schema.sql", "sql/002_events.sql", "sql/003_bartal_forecast.sql")
 _RO_ROLE_NAME = "dombori_ro"
 
@@ -168,53 +168,60 @@ def cmd_collect(conn, config: Config, _args: argparse.Namespace) -> int:
         raise
 
 
+def _hydroinfo_one(conn, config: Config, session: requests.Session, code: str) -> dict:
+    """Egy állomás Hydroinfo-előrejelzésének letöltése és tárolása."""
+    etag = forecasts.latest_etag(conn, code)
+    result = hydroinfo.fetch_table(session, etag=etag, code=code)
+
+    if result.status == 304:
+        return {"status": "noop", "reason": "not modified"}
+
+    source = "table"
+    raw = result.raw
+    etag_out = result.etag
+    try:
+        issue_ts = hydroinfo.parse_issue_ts(result.text)
+        points = hydroinfo.parse_table(result.text, issue_ts)
+    except hydroinfo.ParseError as exc:
+        logger.warning("[%s] table parse failed (%s); falling back to imagemap", code, exc)
+        source = "imagemap"
+        fallback = hydroinfo.fetch_imagemap(session, code=code)
+        raw = fallback.raw
+        etag_out = None
+        issue_ts = datetime.now(timezone.utc)
+        points = hydroinfo.parse_imagemap(fallback.text)
+
+    new_run_id = forecasts.store_run(conn, config, code, issue_ts, raw, etag_out, source, points)
+    if new_run_id is None:
+        return {"status": "noop", "reason": "unchanged content", "source": source}
+    return {"status": "ok", "source": source, "forecast_run_id": new_run_id, "points": len(points)}
+
+
 def cmd_hydroinfo(conn, config: Config, _args: argparse.Namespace) -> int:
     run_id = runs.start_run(conn, "hydroinfo")
-    try:
-        session = requests.Session()
-        etag = forecasts.latest_etag(conn, hydroinfo.STATION_CODE)
-        result = hydroinfo.fetch_table(session, etag=etag)
-
-        if result.status == 304:
-            runs.finish_run(conn, run_id, "noop", detail={"reason": "not modified"})
-            logger.info("Hydroinfo table page unchanged (304)")
-            return 0
-
-        source = "table"
-        raw = result.raw
-        etag_out = result.etag
+    session = requests.Session()
+    results: dict[str, dict] = {}
+    errors: dict[str, str] = {}
+    total_points = 0
+    for code in stations.HYDROINFO_CODES:
         try:
-            issue_ts = hydroinfo.parse_issue_ts(result.text)
-            points = hydroinfo.parse_table(result.text, issue_ts)
-        except hydroinfo.ParseError as exc:
-            logger.warning("Table parse failed (%s); falling back to imagemap", exc)
-            source = "imagemap"
-            fallback = hydroinfo.fetch_imagemap(session)
-            raw = fallback.raw
-            etag_out = None
-            issue_ts = datetime.now(timezone.utc)
-            points = hydroinfo.parse_imagemap(fallback.text)
+            outcome = _hydroinfo_one(conn, config, session, code)
+            results[code] = outcome
+            total_points += outcome.get("points", 0)
+        except Exception as exc:  # egy állomás hibája ne állítsa le a többit
+            conn.rollback()
+            errors[code] = str(exc)
+            logger.error("[%s] hydroinfo failed: %s", code, exc)
 
-        new_run_id = forecasts.store_run(
-            conn, config, hydroinfo.STATION_CODE, issue_ts, raw, etag_out, source, points
-        )
-
-        if new_run_id is None:
-            runs.finish_run(conn, run_id, "noop", detail={"reason": "unchanged content", "source": source})
-        else:
-            runs.finish_run(
-                conn,
-                run_id,
-                "ok",
-                rows_upserted=len(points),
-                detail={"source": source, "forecast_run_id": new_run_id, "points": len(points)},
-            )
-        return 0
-    except Exception as exc:
-        conn.rollback()
-        runs.finish_run(conn, run_id, "error", detail={"error": str(exc)})
-        logger.error("hydroinfo job failed: %s", exc)
-        raise
+    if errors and not results:
+        runs.finish_run(conn, run_id, "error", detail={"errors": errors})
+        return 1
+    status = "ok" if any(r["status"] == "ok" for r in results.values()) else "noop"
+    detail: dict = {"stations": results}
+    if errors:
+        detail["errors"] = errors
+    runs.finish_run(conn, run_id, status, rows_upserted=total_points, detail=detail)
+    return 0
 
 
 def cmd_daily(conn, config: Config, args: argparse.Namespace) -> int:
