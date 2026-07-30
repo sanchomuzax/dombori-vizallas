@@ -83,6 +83,22 @@ pozitív (vízpótlás, kotrás, duzzasztás), **piros** = negatív (lefűződé
 Új esemény felvétele: sor a seed SQL-be, majd újrafuttatás
 (`docker exec -i dombori_db psql -U dombori -d dombori < sql/002_events.sql`).
 
+## Grafana dashboardok (verziózva)
+
+A `grafana/` mappa a két dashboard mentett definícióját tartalmazza. Titkot nem
+tartalmaznak: a datasource-ra a `${DS_DOMBORI}` placeholderrel hivatkoznak
+(importáláskor a Grafana megkérdezi, melyik adatforrás legyen), a `dombori_ro`
+jelszava a Grafana saját titkos tárában marad.
+
+| Fájl | Tartalom |
+|---|---|
+| `dombori-vizallas.json` | fő dashboard (aktuális szintek, előrejelzések, kamerák, történelmi sávok, gyűjtés-állapot) |
+| `dombori-szezonalis.json` | szezonális összevetés (évek egymáson) — **generált**, ne kézzel szerkeszd |
+| `build_szezonalis.py` | a szezonális dashboard generátora (~200 évenkénti szín-override) |
+
+Frissítés: `python3 grafana/build_szezonalis.py > grafana/dombori-szezonalis.json`
+Importálás: Grafana → Dashboards → New → Import → *Upload JSON file*.
+
 ## Tesztek
 
 ```bash

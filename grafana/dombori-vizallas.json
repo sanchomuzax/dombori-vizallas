@@ -1,0 +1,832 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+        "enable": true,
+        "hide": false,
+        "iconColor": "green",
+        "name": "Pozitív vízügyi események",
+        "target": {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date",
+          "refId": "Anno"
+        }
+      },
+      {
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "Negatív vízügyi események",
+        "target": {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date",
+          "refId": "Anno"
+        }
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Szezonális összevetés",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/dombori-szezonalis"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Tsz 550 · LKV −87 cm · LNV 916 cm (2013)",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": 0 },
+              { "color": "green", "value": -80 },
+              { "color": "#EAB839", "value": 700 },
+              { "color": "red", "value": 916 }
+            ]
+          },
+          "unit": "lengthcm"
+        }
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^value_cm$/", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "table",
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm FROM observations WHERE station_tsz = 550 ORDER BY ts_utc DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Duna–Dombori aktuális",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Tsz 142062 · KF I/II/III: 170/190/200 cm",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "#EAB839", "value": 170 },
+              { "color": "orange", "value": 190 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "lengthcm"
+        }
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^value_cm$/", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "table",
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm FROM observations WHERE station_tsz = 142062 ORDER BY ts_utc DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Fadd/Bartal aktuális",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Percek a legutóbbi mérés óta",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "#EAB839", "value": 90 },
+              { "color": "red", "value": 180 }
+            ]
+          },
+          "unit": "m"
+        }
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "table",
+          "rawSql": "SELECT round(extract(epoch FROM now() - max(ts_utc)) / 60) AS freshness_min FROM observations",
+          "refId": "A"
+        }
+      ],
+      "title": "Adatfrissesség",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "A Hydroinfo 6 napos Duna-előrejelzése eléri-e a 400 cm-t (Dombori szivornya minimum). Ha igen, gravitációs feltöltés válhat lehetővé a holtágba.",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": { "color": "dark-blue", "text": "Nem várható" },
+                "1": { "color": "green", "text": "Lehetséges!" }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-blue", "value": 0 }] }
+        }
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 0 },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "table",
+          "rawSql": "SELECT CASE WHEN (detail->>'szivornya_lehetseges')::boolean THEN 1 ELSE 0 END AS ertek FROM forecast_runs WHERE source = 'statisztikai' ORDER BY issue_ts DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Szivornyás feltöltés?",
+      "type": "stat"
+    },
+    {
+      "description": "Élő állókép az ADUVIZIG paksi kamerájából. A kép a dashboard beállított frissítési időközével (URL refresh paramétere) újratöltődik; ha a frissítés ki van kapcsolva, a kép is áll. Kattints rá a teljes mérethez (új lapon).",
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 0 },
+      "id": 10,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
+        "content": "<a href=\"http://www2.aduvizig.hu/getlastpic/GetLastPic.aspx?paks\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:block;height:100%;text-align:center;\"><img id=\"cam_paks\" src=\"http://www2.aduvizig.hu/getlastpic/GetLastPic.aspx?paks\" alt=\"Paksi vízmérce kamera\" style=\"max-width:100%;max-height:100%;object-fit:contain;\" onload=\"(function(){if(window.__camPaksInit)return;window.__camPaksInit=1;var id='cam_paks',q='?paks';function bust(){var n=Math.floor(Date.now()/1000),name='getlastpic.aspx',s='';for(var i=0;i<name.length;i++){s+=((n>>(i%30))&1)?name[i].toUpperCase():name[i]}return 'http://www2.aduvizig.hu/getlastpic/'+s+q+'#'+n}function rms(){var r=(location.search.match(/[?&]refresh=([^&]+)/)||[])[1];if(!r)return null;var m=decodeURIComponent(r).match(/^(\\d+)(s|m|h|d)$/);return m?parseInt(m[1],10)*{s:1e3,m:6e4,h:36e5,d:864e5}[m[2]]:null}var st={ms:0,t:null};function arm(){var ms=rms();if(st.ms===ms)return;st.ms=ms;if(st.t)clearInterval(st.t);st.t=ms?setInterval(function(){var i=document.getElementById(id);if(i)i.src=bust()},ms):null}arm();setInterval(arm,2000)})()\" /></a>",
+        "mode": "html"
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [],
+      "title": "Paks",
+      "type": "text"
+    },
+    {
+      "description": "Élő állókép az ADUVIZIG bajai kamerájából. A kép a dashboard beállított frissítési időközével (URL refresh paramétere) újratöltődik; ha a frissítés ki van kapcsolva, a kép is áll. Kattints rá a teljes mérethez (új lapon).",
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
+      "id": 11,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
+        "content": "<a href=\"http://www2.aduvizig.hu/getlastpic/GetLastPic.aspx?baja2\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:block;height:100%;text-align:center;\"><img id=\"cam_baja\" src=\"http://www2.aduvizig.hu/getlastpic/GetLastPic.aspx?baja2\" alt=\"Bajai vízmérce kamera\" style=\"max-width:100%;max-height:100%;object-fit:contain;\" onload=\"(function(){if(window.__camBajaInit)return;window.__camBajaInit=1;var id='cam_baja',q='?baja2';function bust(){var n=Math.floor(Date.now()/1000),name='getlastpic.aspx',s='';for(var i=0;i<name.length;i++){s+=((n>>(i%30))&1)?name[i].toUpperCase():name[i]}return 'http://www2.aduvizig.hu/getlastpic/'+s+q+'#'+n}function rms(){var r=(location.search.match(/[?&]refresh=([^&]+)/)||[])[1];if(!r)return null;var m=decodeURIComponent(r).match(/^(\\d+)(s|m|h|d)$/);return m?parseInt(m[1],10)*{s:1e3,m:6e4,h:36e5,d:864e5}[m[2]]:null}var st={ms:0,t:null};function arm(){var ms=rms();if(st.ms===ms)return;st.ms=ms;if(st.t)clearInterval(st.t);st.t=ms?setInterval(function(){var i=document.getElementById(id);if(i)i.src=bust()},ms):null}arm();setInterval(arm,2000)})()\" /></a>",
+        "mode": "html"
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [],
+      "title": "Baja",
+      "type": "text"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "A legutóbbi előrejelzés-kiadás; szaggatott = előrejelzett. Zöld vonal: 400 cm (Dombori szivornya minimum); piros vonalak: LKV −87 cm és LNV 916 cm (hivatalos nyilvántartás — az 1956-os jeges árvíz 1077 cm-e nem számít bele).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 950,
+            "axisSoftMin": -120,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": 0 },
+              { "color": "green", "value": -87 },
+              { "color": "orange", "value": 400 },
+              { "color": "red", "value": 916 }
+            ]
+          },
+          "unit": "lengthcm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "előrejelzés" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [8, 6], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "felső" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 0 },
+              { "id": "custom.fillBelowTo", "value": "alsó" },
+              { "id": "custom.fillOpacity", "value": 15 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.hideFrom", "value": { "legend": true, "tooltip": true, "viz": false } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "alsó" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 0 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.hideFrom", "value": { "legend": true, "tooltip": true, "viz": false } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "mért" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 6 },
+      "id": 6,
+      "options": {
+        "annotations": { "clustering": -1, "multiLane": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 550 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 550 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT target_ts AS \"time\", value_cm AS \"előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442540H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT target_ts AS \"time\", value_cm + coalesce(error_band_cm, 0) AS \"felső\", value_cm - coalesce(error_band_cm, 0) AS \"alsó\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442540H' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1",
+          "refId": "C"
+        }
+      ],
+      "title": "Duna-Dombori: mért + Hydroinfo előrejelzés (±sáv)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Saját 6 napos statisztikai előrejelzés: perzisztencia + szezonális drift a 2005 óta gyűjtött napi adatokból; a sáv a történelmi p5–p95 terjedelem (~90%). A Duna-korreláció bizonyítottan gyenge, ezért a Duna csak eseményjelző (szivornya-panel). Küszöbök: KF I/II/III = 170/190/200 cm.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 210,
+            "axisSoftMin": 80,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": 0 },
+              { "color": "#EAB839", "value": 170 },
+              { "color": "orange", "value": 190 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "lengthcm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "mért" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "előrejelzés" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [8, 6], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "felső" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 0 },
+              { "id": "custom.fillBelowTo", "value": "alsó" },
+              { "id": "custom.fillOpacity", "value": 15 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.hideFrom", "value": { "legend": true, "tooltip": true, "viz": false } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "alsó" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 0 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.hideFrom", "value": { "legend": true, "tooltip": true, "viz": false } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 6 },
+      "id": 13,
+      "options": {
+        "annotations": { "clustering": -1, "multiLane": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT ts_utc AS \"time\", value_cm AS \"mért\" FROM observations WHERE station_tsz = 142062 AND $__timeFilter(ts_utc) UNION ALL SELECT (day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", mean_cm FROM daily_aggregates WHERE station_tsz = 142062 AND $__timeFilter(day_local) AND day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27 ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 142062 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"előrejelzés\" FROM last_obs UNION ALL SELECT target_ts, value_cm FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '142062' AND source = 'statisztikai' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "WITH last_obs AS (SELECT ts_utc, value_cm FROM observations WHERE station_tsz = 142062 ORDER BY ts_utc DESC LIMIT 1) SELECT ts_utc AS \"time\", value_cm AS \"felső\", value_cm AS \"alsó\" FROM last_obs UNION ALL SELECT target_ts, value_cm + coalesce(error_band_cm, 0), value_cm - coalesce(error_band_cm, 0) FROM forecast_points WHERE point_type = 'forecast' AND target_ts > (SELECT ts_utc FROM last_obs) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '142062' AND source = 'statisztikai' ORDER BY issue_ts DESC LIMIT 1) ORDER BY 1",
+          "refId": "C"
+        }
+      ],
+      "title": "Fadd-Bartal: mért + statisztikai előrejelzés (±sáv)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": 7200000,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "lengthcm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Dombori" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } },
+              { "id": "displayName", "value": "Duna" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Fadd (Dombori) - korábbi neve: Bartal zsilip /Faddi/" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "displayName", "value": "Bartal" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Bartal" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Duna" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 6 },
+      "id": 5,
+      "options": {
+        "annotations": { "clustering": -1, "multiLane": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT o.ts_utc AS \"time\", s.name AS metric, o.value_cm\nFROM observations o\nJOIN stations s ON s.tsz = o.station_tsz\nWHERE $__timeFilter(o.ts_utc)\n\nUNION ALL\n\nSELECT (d.day_local::timestamp + interval '12 hours') AT TIME ZONE 'Europe/Budapest' AS \"time\", s.name AS metric, d.mean_cm\nFROM daily_aggregates d\nJOIN stations s ON s.tsz = d.station_tsz\nWHERE $__timeFilter(d.day_local)\n  AND d.day_local < (now() AT TIME ZONE 'Europe/Budapest')::date - 27\nORDER BY 1",
+          "refId": "A",
+          "sql": {
+            "columns": [{ "parameters": [], "type": "function" }],
+            "groupBy": [{ "property": { "type": "string" }, "type": "groupBy" }],
+            "limit": 50
+          }
+        }
+      ],
+      "timeFrom": "91d",
+      "title": "Vízállás - 15 perces + archív napi átlag",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Adaptív felbontás: széles nézetben havi min–max sáv, bezoomolva napi",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 1,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "lengthcm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Max" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 1 },
+              { "id": "custom.fillBelowTo", "value": "Min" },
+              { "id": "custom.fillOpacity", "value": 30 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Min" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 1 },
+              { "id": "custom.fillOpacity", "value": 0 },
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Átlag" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 1 },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 15 },
+      "id": 7,
+      "options": {
+        "annotations": { "clustering": -1, "multiLane": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT to_timestamp(floor(extract(epoch FROM day_local) / GREATEST($__interval_ms / 1000.0, 86400)) * GREATEST($__interval_ms / 1000.0, 86400)) AS \"time\", min(min_cm) AS \"Min\", round(avg(mean_cm), 1) AS \"Átlag\", max(max_cm) AS \"Max\" FROM daily_aggregates WHERE station_tsz = 550 AND $__timeFilter(day_local) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "125y",
+      "title": "Duna–Dombori - napi min/átlag/max (történelmi, 1901-től)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Faddi-Holt-Duna a zsilipnél. Adaptív felbontás: széles nézetben havi sáv, bezoomolva napi. Küszöbvonalak: KF I 170 (sárga), KF II 190 (narancs), KF III 200 cm (piros).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": 0 },
+              { "color": "#EAB839", "value": 170 },
+              { "color": "orange", "value": 190 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "lengthcm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Max" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 1 },
+              { "id": "custom.fillBelowTo", "value": "Min" },
+              { "id": "custom.fillOpacity", "value": 30 },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Min" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 1 },
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Átlag" },
+            "properties": [
+              { "id": "custom.lineWidth", "value": 2 },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 15 },
+      "id": 9,
+      "options": {
+        "annotations": { "clustering": -1, "multiLane": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "enableFacetedFilter": false,
+          "overflow": "ellipsis",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "time_series",
+          "rawSql": "SELECT to_timestamp(floor(extract(epoch FROM day_local) / GREATEST($__interval_ms / 1000.0, 86400)) * GREATEST($__interval_ms / 1000.0, 86400)) AS \"time\", min(min_cm) AS \"Min\", round(avg(mean_cm), 1) AS \"Átlag\", max(max_cm) AS \"Max\" FROM daily_aggregates WHERE station_tsz = 142062 AND $__timeFilter(day_local) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "55y",
+      "title": "Fadd/Bartal zsilip - napi min/átlag/max (történelmi, 1973-tól)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+      "description": "Az automatikus adatgyűjtő munkák utolsó futása.\n\nHa a vízállás-gyűjtés friss (negyedórán belüli) és „Rendben”, a rendszer egészséges.\n\nA „Nem volt új adat” NEM hiba: a vízügyi forrás óránként közli a friss méréseket, előrejelzés pedig csak napi négyszer készül — a köztes futások üresen térnek vissza.\n\nAz „Új adatsor” azt mutatja, hány mérési pont került be vagy frissült az adott futáskor.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "footer": { "reducers": [] },
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "job", "scope": "series" },
+            "properties": [{ "id": "custom.width", "value": 101 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "utolsó", "scope": "series" },
+            "properties": [{ "id": "custom.width", "value": 110 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "status", "scope": "series" },
+            "properties": [{ "id": "custom.width", "value": 92 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "sorok", "scope": "series" },
+            "properties": [{ "id": "custom.width", "value": 56 }]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 24 },
+      "id": 4,
+      "options": { "cellHeight": "sm", "showHeader": true },
+      "pluginVersion": "13.1.1",
+      "targets": [
+        {
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "${DS_DOMBORI}" },
+          "format": "table",
+          "rawSql": "SELECT DISTINCT ON (job) CASE job WHEN 'collect' THEN 'Vízállás-gyűjtés (15 percenként)' WHEN 'hydroinfo' THEN 'Duna-előrejelzés letöltése (óránként)' WHEN 'daily' THEN 'Hajnali karbantartás (03:30)' WHEN 'bartal-forecast' THEN 'Bartal-előrejelzés számítása' WHEN 'backfill' THEN 'Történelmi betöltés (egyszeri, kész)' ELSE job END AS \"Feladat\", to_char(started_at AT TIME ZONE 'Europe/Budapest', 'MM.DD. HH24:MI') AS \"Utolsó futás\", CASE status WHEN 'ok' THEN 'Rendben' WHEN 'noop' THEN 'Nem volt új adat' WHEN 'error' THEN 'HIBA' WHEN 'running' THEN 'Éppen fut' ELSE status END AS \"Eredmény\", rows_upserted AS \"Új adatsor\" FROM ingestion_runs ORDER BY job, started_at DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Adatgyűjtés állapota",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "5m",
+  "schemaVersion": 42,
+  "tags": ["dombori", "vizallas", "duna"],
+  "time": { "from": "now-28d", "to": "now+6d" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+  },
+  "timezone": "Europe/Budapest",
+  "title": "Dombori vízállás",
+  "uid": "dombori-vizallas",
+  "weekStart": "monday"
+}
