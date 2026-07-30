@@ -228,7 +228,8 @@ def build() -> dict:
                   run_filter="station_code = '142062' AND source = 'statisztikai'", forecast=True),
         ],
         "preload": False, "refresh": "", "schemaVersion": 42,
-        "tags": ["dombori", "vizallas", "duna"],
+        "tags": ["dombori", "vizallas", "duna", "vízállás"],
+        "links": [{"asDropdown": true, "icon": "external link", "includeVars": false, "keepTime": false, "tags": ["vízállás"], "targetBlank": false, "title": "menü", "tooltip": "", "type": "dashboards", "url": ""}],
         "templating": {"list": [
             variable("elso_ev", "Első év",
                      "SELECT min(extract(year FROM day_local))::int FROM daily_aggregates"
