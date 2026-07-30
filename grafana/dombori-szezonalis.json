@@ -27,7 +27,7 @@
           "format": "table",
           "rawQuery": true,
           "refId": "Anno",
-          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date"
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' - ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date"
         }
       },
       {
@@ -44,7 +44,7 @@
           "format": "table",
           "rawQuery": true,
           "refId": "Anno",
-          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date"
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' - ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date"
         }
       }
     ]
@@ -60,7 +60,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Minden év az aktuális év naptárára vetítve — évfüggetlen, magától frissül. Színskála: sötétszürke (1901) → kék; narancs = tavalyi, vastag piros = idei év; halványpiros szaggatott = Hydroinfo előrejelzés. Zöld vonal: 400 cm — Dombori szivornya minimum.",
+      "description": "Minden év az aktuális év naptárára vetítve - évfüggetlen, magától frissül. Színskála: sötétszürke (1901) → kék; narancs = tavalyi, vastag piros = idei év; halványpiros szaggatott = Hydroinfo előrejelzés. Zöld vonal: 400 cm - Dombori szivornya minimum.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2282,7 +2282,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz AS \"time\", round(avg(value_cm), 1) AS \"előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442540H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Napi átlag vízállás évenként egymáson — Duna–Dombori (${elso_ev}–${aktualis_ev})",
+      "title": "Napi átlag vízállás évenként egymáson - Duna–Dombori (${elso_ev}–${aktualis_ev})",
       "type": "timeseries"
     },
     {
@@ -2290,7 +2290,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Minden év az aktuális év naptárára vetítve — évfüggetlen. Színskála: sötétszürke (1973) → kék; narancs = tavalyi, vastag piros = idei év; halványpiros szaggatott = statisztikai előrejelzés. Küszöbvonalak: KF I 170 (sárga), KF II 190 (narancs), KF III 200 cm (piros).",
+      "description": "Minden év az aktuális év naptárára vetítve - évfüggetlen. Színskála: sötétszürke (1973) → kék; narancs = tavalyi, vastag piros = idei év; halványpiros szaggatott = statisztikai előrejelzés. Küszöbvonalak: KF I 170 (sárga), KF II 190 (narancs), KF III 200 cm (piros).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3440,7 +3440,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz AS \"time\", round(avg(value_cm), 1) AS \"előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '142062' AND source = 'statisztikai' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Napi átlag vízállás évenként egymáson — Fadd/Bartal zsilip (${elso_ev_bartal}–${aktualis_ev})",
+      "title": "Napi átlag vízállás évenként egymáson - Fadd/Bartal zsilip (${elso_ev_bartal}–${aktualis_ev})",
       "type": "timeseries"
     }
   ],
@@ -3554,7 +3554,7 @@
   },
   "timepicker": {},
   "timezone": "Europe/Budapest",
-  "title": "Dombori vízállás — szezonális összevetés",
+  "title": "Dombori vízállás - szezonális összevetés",
   "uid": "dombori-szezonalis",
   "weekStart": "monday"
 }

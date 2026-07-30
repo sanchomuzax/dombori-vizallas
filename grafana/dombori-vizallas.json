@@ -26,7 +26,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date",
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' - ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date",
           "refId": "Anno"
         }
       },
@@ -43,7 +43,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' — ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date",
+          "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend, title || ' - ' || coalesce(location, '') AS text, event_type AS tags FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date",
           "refId": "Anno"
         }
       }
@@ -407,7 +407,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "A legutóbbi előrejelzés-kiadás; szaggatott = előrejelzett. Zöld vonal: 400 cm (Dombori szivornya minimum); piros vonalak: LKV −87 cm és LNV 916 cm (hivatalos nyilvántartás — az 1956-os jeges árvíz 1077 cm-e nem számít bele).",
+      "description": "A legutóbbi előrejelzés-kiadás; szaggatott = előrejelzett. Zöld vonal: 400 cm (Dombori szivornya minimum); piros vonalak: LKV −87 cm és LNV 916 cm (hivatalos nyilvántartás - az 1956-os jeges árvíz 1077 cm-e nem számít bele).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1418,7 +1418,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Az automatikus adatgyűjtő munkák utolsó futása.\n\nHa a vízállás-gyűjtés friss (negyedórán belüli) és „Rendben”, a rendszer egészséges.\n\nA „Nem volt új adat” NEM hiba: a vízügyi forrás óránként közli a friss méréseket, előrejelzés pedig csak napi négyszer készül — a köztes futások üresen térnek vissza.\n\nAz „Új adatsor” azt mutatja, hány mérési pont került be vagy frissült az adott futáskor.",
+      "description": "Az automatikus adatgyűjtő munkák utolsó futása.\n\nHa a vízállás-gyűjtés friss (negyedórán belüli) és „Rendben”, a rendszer egészséges.\n\nA „Nem volt új adat” NEM hiba: a vízügyi forrás óránként közli a friss méréseket, előrejelzés pedig csak napi négyszer készül - a köztes futások üresen térnek vissza.\n\nAz „Új adatsor” azt mutatja, hány mérési pont került be vagy frissült az adott futáskor.",
       "fieldConfig": {
         "defaults": {
           "custom": {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Az „Országos vízállás — Duna" dashboard generátora.
+"""Az „Országos vízállás - Duna" dashboard generátora.
 
 4 állomás (Komárom, Budapest, Paks, Mohács), állomásonként stat + saját
 mért+előrejelzés panel (±sáv, LKV/LNV terület-küszöbök), a predikció az
@@ -142,7 +142,7 @@ def build() -> dict:
         "panels": panels, "preload": False, "refresh": "5m", "schemaVersion": 42,
         "tags": ["dombori", "vizallas", "duna", "orszagos", "vízállás"],
         "time": {"from": "now-28d", "to": "now+6d"}, "timepicker": {},
-        "timezone": "Europe/Budapest", "title": "Országos vízállás — Duna",
+        "timezone": "Europe/Budapest", "title": "Országos vízállás - Duna",
         "uid": "orszagos-vizallas", "weekStart": "monday",
     }
 

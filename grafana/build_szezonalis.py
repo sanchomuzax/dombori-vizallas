@@ -18,8 +18,8 @@ from __future__ import annotations
 import json
 
 DS = "${DS_DOMBORI}"
-GRAD_START = (58, 58, 62)      # #3a3a3e — legrégebbi év
-GRAD_END = (61, 113, 217)      # #3d71d9 — 2024
+GRAD_START = (58, 58, 62)      # #3a3a3e - legrégebbi év
+GRAD_END = (61, 113, 217)      # #3d71d9 - 2024
 GRAD_END_YEAR = 2024
 # 2025 utáni évek előre kiosztott színe, hogy a jövő is a skálán maradjon
 FUTURE_COLORS = [
@@ -194,30 +194,30 @@ def build() -> dict:
              "name": "Pozitív vízügyi események",
              "target": {"editorMode": "code", "format": "table", "rawQuery": True, "refId": "Anno",
                         "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend,"
-                                  " title || ' — ' || coalesce(location, '') AS text, event_type AS tags"
+                                  " title || ' - ' || coalesce(location, '') AS text, event_type AS tags"
                                   " FROM holtag_events WHERE impact = 'pozitiv' ORDER BY start_date"}},
             {"datasource": {"type": "grafana-postgresql-datasource", "uid": DS},
              "enable": True, "hide": False, "iconColor": "red",
              "name": "Negatív vízügyi események",
              "target": {"editorMode": "code", "format": "table", "rawQuery": True, "refId": "Anno",
                         "rawSql": "SELECT start_date::timestamptz AS time, end_date::timestamptz AS timeend,"
-                                  " title || ' — ' || coalesce(location, '') AS text, event_type AS tags"
+                                  " title || ' - ' || coalesce(location, '') AS text, event_type AS tags"
                                   " FROM holtag_events WHERE impact = 'negativ' ORDER BY start_date"}},
         ]},
         "editable": True, "fiscalYearStartMonth": 0, "graphTooltip": 0, "id": None, "liveNow": False,
         "panels": [
             panel(pid=1, tsz=550, y=0, first_year_var=1901,
-                  title="Napi átlag vízállás évenként egymáson — Duna–Dombori (${elso_ev}–${aktualis_ev})",
-                  description="Minden év az aktuális év naptárára vetítve — évfüggetlen, magától"
+                  title="Napi átlag vízállás évenként egymáson - Duna–Dombori (${elso_ev}–${aktualis_ev})",
+                  description="Minden év az aktuális év naptárára vetítve - évfüggetlen, magától"
                               " frissül. Színskála: sötétszürke (1901) → kék; narancs = tavalyi,"
                               " vastag piros = idei év; halványpiros szaggatott = Hydroinfo"
-                              " előrejelzés. Zöld vonal: 400 cm — Dombori szivornya minimum.",
+                              " előrejelzés. Zöld vonal: 400 cm - Dombori szivornya minimum.",
                   thresholds=[{"color": "transparent", "value": 0}, {"color": "green", "value": 400}],
                   threshold_mode="line", run_filter="station_code = '442540H'", forecast=True),
             panel(pid=2, tsz=142062, y=13, first_year_var=1973,
-                  title="Napi átlag vízállás évenként egymáson — Fadd/Bartal zsilip"
+                  title="Napi átlag vízállás évenként egymáson - Fadd/Bartal zsilip"
                         " (${elso_ev_bartal}–${aktualis_ev})",
-                  description="Minden év az aktuális év naptárára vetítve — évfüggetlen."
+                  description="Minden év az aktuális év naptárára vetítve - évfüggetlen."
                               " Színskála: sötétszürke (1973) → kék; narancs = tavalyi, vastag"
                               " piros = idei év; halványpiros szaggatott = statisztikai előrejelzés."
                               " Küszöbvonalak: KF I 170 (sárga), KF II 190 (narancs),"
@@ -241,7 +241,7 @@ def build() -> dict:
         ]},
         "time": {"from": "now/y", "to": "now/y"},
         "timepicker": {}, "timezone": "Europe/Budapest",
-        "title": "Dombori vízállás — szezonális összevetés",
+        "title": "Dombori vízállás - szezonális összevetés",
         "uid": "dombori-szezonalis", "weekStart": "monday",
     }
 
@@ -260,8 +260,8 @@ def build_orszagos() -> dict:
     for i, (name, tsz, code, lnv) in enumerate(ORSZAGOS_STATIONS):
         panels.append(panel(
             pid=i + 1, tsz=tsz, y=i * 13, first_year_var=1901, decades=True,
-            title=f"{name} — napi átlag évenként egymáson (${{elso_ev}}–${{aktualis_ev}})",
-            description=f"Minden év az aktuális év naptárára vetítve — évfüggetlen."
+            title=f"{name} - napi átlag évenként egymáson (${{elso_ev}}–${{aktualis_ev}})",
+            description=f"Minden év az aktuális év naptárára vetítve - évfüggetlen."
                         f" Színskála: sötétszürke (régi) → kék (új) évtizedenként;"
                         f" narancs = tavalyi, vastag piros = idei; sötétpiros szaggatott ="
                         f" Hydroinfo előrejelzés. Piros vonal: LNV {lnv} cm.",
@@ -276,7 +276,7 @@ def build_orszagos() -> dict:
                  " WHERE station_tsz IN (5, 1026, 549, 831)"),
         variable("aktualis_ev", "Aktuális év", "SELECT extract(year FROM now())::int"),
     ]
-    base["title"] = "Országos vízállás — szezonális összevetés"
+    base["title"] = "Országos vízállás - szezonális összevetés"
     base["uid"] = "orszagos-vizallas-szezonalis"
     return base
 
