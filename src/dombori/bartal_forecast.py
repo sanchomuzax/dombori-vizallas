@@ -101,7 +101,7 @@ def compute_forecast(
     """Pure: 50% szezonális drift + 50% lendület + empirikus sáv.
 
     A 2005-2026-os backtest szerint (6 napos MAE): szezonális 2,22 cm,
-    tiszta momentum 2,66, 50-50 blend 2,21 — eső trendben a blend
+    tiszta momentum 2,66, 50-50 blend 2,21 - eső trendben a blend
     kifejezetten jobb (2,24 vs 2,50), ezért a keverék a modell.
     """
     if len(series) < 365:
