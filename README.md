@@ -8,23 +8,23 @@ aggregálás, Hydroinfo-előrejelzések verziózott tárolása, Grafana dashboar
 
 | Állomás | Törzsszám | Hydroinfo | Meder | Jellemzők |
 |---|---|---|---|---|
-| Duna – Komárom | `5` | 442522H | Duna, 1768,4 fkm | LKV −12; LNV 845; adatok 1901-től |
-| Duna – Budapest | `1026` | 442027H | Duna, 1646,5 fkm | LKV 33; LNV 891; adatok 1901-től |
-| Duna – Paks | `549` | 442030H | Duna, 1531,3 fkm | LKV −97; LNV 891; adatok 1901-től |
-| Duna – Dombori | `550` | 442540H | Duna, 1506,8 fkm | Npt 83,52 mBf; LKV −87; LNV 916; adatok 1901-től |
-| Duna – Mohács | `831` | 442032H | Duna, 1446,9 fkm | LKV 26; LNV 984 (országos rekord); adatok 1901-től |
-| Fadd (Dombori), volt Bartal zsilip | `142062` | — | Faddi-Holt-Duna | Npt 86,53 mBf; KF 170/190/200; adatok 1973-tól |
+| Duna - Komárom | `5` | 442522H | Duna, 1768,4 fkm | LKV -12; LNV 845; adatok 1901-től |
+| Duna - Budapest | `1026` | 442027H | Duna, 1646,5 fkm | LKV 33; LNV 891; adatok 1901-től |
+| Duna - Paks | `549` | 442030H | Duna, 1531,3 fkm | LKV -97; LNV 891; adatok 1901-től |
+| Duna - Dombori | `550` | 442540H | Duna, 1506,8 fkm | Npt 83,52 mBf; LKV -87; LNV 916; adatok 1901-től |
+| Duna - Mohács | `831` | 442032H | Duna, 1446,9 fkm | LKV 26; LNV 984 (országos rekord); adatok 1901-től |
+| Fadd (Dombori), volt Bartal zsilip | `142062` | - | Faddi-Holt-Duna | Npt 86,53 mBf; KF 170/190/200; adatok 1973-tól |
 
 Új állomás felvétele: sor a `src/dombori/stations.py` registry-be, majd
 `init-db` (seed) és `backfill --station <tsz>`.
 
 ## Adatforrások
 
-- **vraquery API** (a [data.vizugy.hu](https://data.vizugy.hu) backendje) — mért
+- **vraquery API** (a [data.vizugy.hu](https://data.vizugy.hu) backendje) - mért
   vízállás, 15 perces bontásban. Token: `GET /AuthApi/auth/token` (Origin/Referer
   fejléc kötelező), idősor: `POST /vraquery/TS/TsShortList` Bearer tokennel.
-- **Hydroinfo** ([hydroinfo.hu](https://www.hydroinfo.hu)) — 6 órás
-  vízállás-előrejelzés a `442540H` (Duna–Dombori) állomásra, óránkénti
+- **Hydroinfo** ([hydroinfo.hu](https://www.hydroinfo.hu)) - 6 órás
+  vízállás-előrejelzés a `442540H` (Duna-Dombori) állomásra, óránkénti
   conditional GET-tel (ETag), kiadásonként verziózva.
 
 Az adatok az OVF nyílt adat politikája szerint forrásmegjelöléssel
@@ -73,7 +73,7 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 
 A `daily` job (és a kézi `bartal-forecast` parancs) 6 napos előrejelzést számol
 a Bartal (142062) állomásra: **perzisztencia + szezonális drift** (a 2005 utáni
-napi adatok naptári-nap-ablakos mediánja) + **empirikus p5–p95 hibasáv**.
+napi adatok naptári-nap-ablakos mediánja) + **empirikus p5-p95 hibasáv**.
 A Duna-szint korrelációja mérten elhanyagolható (Δ-korreláció ≈ 0, a holtág
 zsilipekkel kezelt rendszer), ezért a Duna csak eseményjelző: ha a Hydroinfo
 Duna-előrejelzés eléri a 400 cm-t, a run `szivornya_lehetseges` jelzést kap.
@@ -100,10 +100,10 @@ jelszava a Grafana saját titkos tárában marad.
 | Fájl | Tartalom |
 |---|---|
 | `dombori-vizallas.json` | fő dashboard (aktuális szintek, előrejelzések, kamerák, történelmi sávok, gyűjtés-állapot) |
-| `dombori-szezonalis.json` | szezonális összevetés (évek egymáson) — **generált**, ne kézzel szerkeszd |
+| `dombori-szezonalis.json` | szezonális összevetés (évek egymáson) - **generált**, ne kézzel szerkeszd |
 | `build_szezonalis.py` | a szezonális dashboardok generátora (dombori + orszagos mód) |
-| `orszagos-vizallas.json` + `build_orszagos.py` | „Országos vízállás — Duna" (generált) |
-| `orszagos-szezonalis.json` | „Országos vízállás — szezonális összevetés" (generált) |
+| `orszagos-vizallas.json` + `build_orszagos.py` | „Országos vízállás - Duna" (generált) |
+| `orszagos-szezonalis.json` | „Országos vízállás - szezonális összevetés" (generált) |
 
 Frissítés: `python3 grafana/build_szezonalis.py > grafana/dombori-szezonalis.json`
 Importálás: Grafana → Dashboards → New → Import → *Upload JSON file*.
@@ -121,7 +121,7 @@ Az integrációs tesztek (élő DB kell hozzájuk) automatikusan kimaradnak, ha 
 
 - Logok: `journalctl --user -u dombori-collect` (ill. `-hydroinfo`, `-daily`)
 - Ingestion napló a DB-ben: `ingestion_runs` tábla (status: ok/error/noop)
-- Backup: `./scripts/db_backup.sh` (pg_dump, 14 napos rotáció) — az éjszakai
+- Backup: `./scripts/db_backup.sh` (pg_dump, 14 napos rotáció) - az éjszakai
   host-backupba egy sorral beköthető
 - Grafana datasource: PostgreSQL, `localhost:5434`, db `dombori`, user
   `dombori_ro` (jelszó: `.env.local` → `DOMBORI_RO_PASSWORD`)

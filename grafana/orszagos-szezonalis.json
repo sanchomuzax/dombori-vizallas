@@ -433,7 +433,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM day_local)::int, extract(day FROM day_local)::int)::timestamptz AS \"time\", mean_cm AS \"előrejelzés\" FROM daily_aggregates WHERE station_tsz = 5 AND day_local = (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 5) UNION ALL SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz, round(avg(value_cm), 1) FROM forecast_points WHERE point_type = 'forecast' AND (target_ts AT TIME ZONE 'Europe/Budapest')::date > (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 5) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442522H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Komárom - napi átlag évenként egymáson (${elso_ev}–${aktualis_ev})",
+      "title": "Komárom - napi átlag évenként egymáson (${elso_ev}-${aktualis_ev})",
       "type": "timeseries"
     },
     {
@@ -848,7 +848,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM day_local)::int, extract(day FROM day_local)::int)::timestamptz AS \"time\", mean_cm AS \"előrejelzés\" FROM daily_aggregates WHERE station_tsz = 1026 AND day_local = (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 1026) UNION ALL SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz, round(avg(value_cm), 1) FROM forecast_points WHERE point_type = 'forecast' AND (target_ts AT TIME ZONE 'Europe/Budapest')::date > (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 1026) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442027H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Budapest - napi átlag évenként egymáson (${elso_ev}–${aktualis_ev})",
+      "title": "Budapest - napi átlag évenként egymáson (${elso_ev}-${aktualis_ev})",
       "type": "timeseries"
     },
     {
@@ -1263,7 +1263,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM day_local)::int, extract(day FROM day_local)::int)::timestamptz AS \"time\", mean_cm AS \"előrejelzés\" FROM daily_aggregates WHERE station_tsz = 549 AND day_local = (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 549) UNION ALL SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz, round(avg(value_cm), 1) FROM forecast_points WHERE point_type = 'forecast' AND (target_ts AT TIME ZONE 'Europe/Budapest')::date > (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 549) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442030H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Paks - napi átlag évenként egymáson (${elso_ev}–${aktualis_ev})",
+      "title": "Paks - napi átlag évenként egymáson (${elso_ev}-${aktualis_ev})",
       "type": "timeseries"
     },
     {
@@ -1678,7 +1678,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM day_local)::int, extract(day FROM day_local)::int)::timestamptz AS \"time\", mean_cm AS \"előrejelzés\" FROM daily_aggregates WHERE station_tsz = 831 AND day_local = (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 831) UNION ALL SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz, round(avg(value_cm), 1) FROM forecast_points WHERE point_type = 'forecast' AND (target_ts AT TIME ZONE 'Europe/Budapest')::date > (SELECT max(day_local) FROM daily_aggregates WHERE station_tsz = 831) AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442032H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Mohács - napi átlag évenként egymáson (${elso_ev}–${aktualis_ev})",
+      "title": "Mohács - napi átlag évenként egymáson (${elso_ev}-${aktualis_ev})",
       "type": "timeseries"
     }
   ],

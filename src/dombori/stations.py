@@ -18,11 +18,11 @@ class Station:
 
 
 STATIONS: tuple[Station, ...] = (
-    Station(5, "Duna–Komárom", "442522H"),
-    Station(1026, "Duna–Budapest", "442027H"),
-    Station(549, "Duna–Paks", "442030H"),
-    Station(550, "Duna–Dombori", "442540H"),
-    Station(831, "Duna–Mohács", "442032H"),
+    Station(5, "Duna-Komárom", "442522H"),
+    Station(1026, "Duna-Budapest", "442027H"),
+    Station(549, "Duna-Paks", "442030H"),
+    Station(550, "Duna-Dombori", "442540H"),
+    Station(831, "Duna-Mohács", "442032H"),
     Station(142062, "Fadd/Bartal zsilip", None),
 )
 

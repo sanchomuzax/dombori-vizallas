@@ -1,4 +1,4 @@
-# CLAUDE.md — dombori-vizallas
+# CLAUDE.md - dombori-vizallas
 
 Útmutató AI agenteknek ehhez a repóhoz.
 
@@ -15,10 +15,10 @@ technikai tudásbázis: `MEMORY.md`.
   minden a `.env.local`-ból jön (gitignore-olva). A `.env.local`-t soha ne
   írd ki, ne logold, ne commitold.
 - **Commitolt fájlban nem szerepelhet** `/home/<user>` abszolút út vagy
-  felhasználónév — systemd unitokban `%h`, scriptekben `$HOME` / `BASH_SOURCE`.
+  felhasználónév - systemd unitokban `%h`, scriptekben `$HOME` / `BASH_SOURCE`.
 - Érdemi változásnál frissítsd a `README.md` + `MEMORY.md` fájlokat is.
 - Verzióemeléskor: verzió átvezetése (`pyproject.toml`, `src/dombori/__init__.py`),
-  git tag `vX.Y.Z`, `gh release create` — kötelező.
+  git tag `vX.Y.Z`, `gh release create` - kötelező.
 
 ## Kódstílus
 
@@ -40,8 +40,8 @@ journalctl --user -u dombori-collect -n 20           # timer log
 
 ## Felépítés
 
-- `src/dombori/` — a package; belépési pont `__main__.py` (argparse subcommandok)
-- `sql/001_schema.sql` — idempotens DDL; sémaváltozás ide, új számozott fájlként
-- `tests/fixtures/` — élőből mentett HTML/JSON minták (parserek ehhez kötve)
-- `systemd/` — a unitok forrásai; telepítés `scripts/install_systemd.sh`-val
-- `data/` — gitignore-olt futásidejű adatok (raw előrejelzés-snapshotok)
+- `src/dombori/` - a package; belépési pont `__main__.py` (argparse subcommandok)
+- `sql/001_schema.sql` - idempotens DDL; sémaváltozás ide, új számozott fájlként
+- `tests/fixtures/` - élőből mentett HTML/JSON minták (parserek ehhez kötve)
+- `systemd/` - a unitok forrásai; telepítés `scripts/install_systemd.sh`-val
+- `data/` - gitignore-olt futásidejű adatok (raw előrejelzés-snapshotok)

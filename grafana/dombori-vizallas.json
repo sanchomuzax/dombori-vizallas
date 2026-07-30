@@ -76,7 +76,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Tsz 550 · LKV −87 cm · LNV 916 cm (2013)",
+      "description": "Tsz 550 · LKV -87 cm · LNV 916 cm (2013)",
       "fieldConfig": {
         "defaults": {
           "decimals": 0,
@@ -140,7 +140,7 @@
           "refId": "A"
         }
       ],
-      "title": "Duna–Dombori aktuális",
+      "title": "Duna-Dombori aktuális",
       "type": "stat"
     },
     {
@@ -407,7 +407,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "A legutóbbi előrejelzés-kiadás; szaggatott = előrejelzett. Zöld vonal: 400 cm (Dombori szivornya minimum); piros vonalak: LKV −87 cm és LNV 916 cm (hivatalos nyilvántartás - az 1956-os jeges árvíz 1077 cm-e nem számít bele).",
+      "description": "A legutóbbi előrejelzés-kiadás; szaggatott = előrejelzett. Zöld vonal: 400 cm (Dombori szivornya minimum); piros vonalak: LKV -87 cm és LNV 916 cm (hivatalos nyilvántartás - az 1956-os jeges árvíz 1077 cm-e nem számít bele).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -641,7 +641,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Saját 6 napos statisztikai előrejelzés: perzisztencia + szezonális drift a 2005 óta gyűjtött napi adatokból; a sáv a történelmi p5–p95 terjedelem (~90%). A Duna-korreláció bizonyítottan gyenge, ezért a Duna csak eseményjelző (szivornya-panel). Küszöbök: KF I/II/III = 170/190/200 cm.",
+      "description": "Saját 6 napos statisztikai előrejelzés: perzisztencia + szezonális drift a 2005 óta gyűjtött napi adatokból; a sáv a történelmi p5-p95 terjedelem (~90%). A Duna-korreláció bizonyítottan gyenge, ezért a Duna csak eseményjelző (szivornya-panel). Küszöbök: KF I/II/III = 170/190/200 cm.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1066,7 +1066,7 @@
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_DOMBORI}"
       },
-      "description": "Adaptív felbontás: széles nézetben havi min–max sáv, bezoomolva napi",
+      "description": "Adaptív felbontás: széles nézetben havi min-max sáv, bezoomolva napi",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1232,7 +1232,7 @@
         }
       ],
       "timeFrom": "125y",
-      "title": "Duna–Dombori - napi min/átlag/max (történelmi, 1901-től)",
+      "title": "Duna-Dombori - napi min/átlag/max (történelmi, 1901-től)",
       "type": "timeseries"
     },
     {

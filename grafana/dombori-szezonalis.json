@@ -2282,7 +2282,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz AS \"time\", round(avg(value_cm), 1) AS \"előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '442540H' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Napi átlag vízállás évenként egymáson - Duna–Dombori (${elso_ev}–${aktualis_ev})",
+      "title": "Napi átlag vízállás évenként egymáson - Duna-Dombori (${elso_ev}-${aktualis_ev})",
       "type": "timeseries"
     },
     {
@@ -3440,7 +3440,7 @@
           "rawSql": "SELECT make_date(extract(year FROM now())::int, extract(month FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int, extract(day FROM (target_ts AT TIME ZONE 'Europe/Budapest'))::int)::timestamptz AS \"time\", round(avg(value_cm), 1) AS \"előrejelzés\" FROM forecast_points WHERE point_type = 'forecast' AND run_id = (SELECT id FROM forecast_runs WHERE station_code = '142062' AND source = 'statisztikai' ORDER BY issue_ts DESC LIMIT 1) GROUP BY 1 ORDER BY 1"
         }
       ],
-      "title": "Napi átlag vízállás évenként egymáson - Fadd/Bartal zsilip (${elso_ev_bartal}–${aktualis_ev})",
+      "title": "Napi átlag vízállás évenként egymáson - Fadd/Bartal zsilip (${elso_ev_bartal}-${aktualis_ev})",
       "type": "timeseries"
     }
   ],

@@ -207,7 +207,7 @@ def build() -> dict:
         "editable": True, "fiscalYearStartMonth": 0, "graphTooltip": 0, "id": None, "liveNow": False,
         "panels": [
             panel(pid=1, tsz=550, y=0, first_year_var=1901,
-                  title="Napi átlag vízállás évenként egymáson - Duna–Dombori (${elso_ev}–${aktualis_ev})",
+                  title="Napi átlag vízállás évenként egymáson - Duna-Dombori (${elso_ev}-${aktualis_ev})",
                   description="Minden év az aktuális év naptárára vetítve - évfüggetlen, magától"
                               " frissül. Színskála: sötétszürke (1901) → kék; narancs = tavalyi,"
                               " vastag piros = idei év; halványpiros szaggatott = Hydroinfo"
@@ -216,7 +216,7 @@ def build() -> dict:
                   threshold_mode="line", run_filter="station_code = '442540H'", forecast=True),
             panel(pid=2, tsz=142062, y=13, first_year_var=1973,
                   title="Napi átlag vízállás évenként egymáson - Fadd/Bartal zsilip"
-                        " (${elso_ev_bartal}–${aktualis_ev})",
+                        " (${elso_ev_bartal}-${aktualis_ev})",
                   description="Minden év az aktuális év naptárára vetítve - évfüggetlen."
                               " Színskála: sötétszürke (1973) → kék; narancs = tavalyi, vastag"
                               " piros = idei év; halványpiros szaggatott = statisztikai előrejelzés."
@@ -260,7 +260,7 @@ def build_orszagos() -> dict:
     for i, (name, tsz, code, lnv) in enumerate(ORSZAGOS_STATIONS):
         panels.append(panel(
             pid=i + 1, tsz=tsz, y=i * 13, first_year_var=1901, decades=True,
-            title=f"{name} - napi átlag évenként egymáson (${{elso_ev}}–${{aktualis_ev}})",
+            title=f"{name} - napi átlag évenként egymáson (${{elso_ev}}-${{aktualis_ev}})",
             description=f"Minden év az aktuális év naptárára vetítve - évfüggetlen."
                         f" Színskála: sötétszürke (régi) → kék (új) évtizedenként;"
                         f" narancs = tavalyi, vastag piros = idei; sötétpiros szaggatott ="
